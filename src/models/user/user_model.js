@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const { user_type } = require("@enums");
 const { user_validation_messages } = require("@validators/messages");
 const {
+  validation_patterns,
   PASSWORD_SALT_ROUNDS,
   user_validation_limits,
   user_validation_patterns,
@@ -54,7 +55,7 @@ const user_schema = new mongoose.Schema(
         user_validation_messages.EMAIL_MAX,
       ],
       match: [
-        user_validation_patterns.EMAIL,
+        validation_patterns.EMAIL,
         user_validation_messages.EMAIL_INVALID,
       ],
       index: true,
@@ -73,7 +74,7 @@ const user_schema = new mongoose.Schema(
         user_validation_messages.PHONE_NUMBER_MAX,
       ],
       match: [
-        user_validation_patterns.PHONE_NUMBER,
+        validation_patterns.PHONE_NUMBER,
         user_validation_messages.PHONE_NUMBER_INVALID,
       ],
       index: true,

@@ -119,6 +119,7 @@ follows. It routes to the skill that owns the layer you are touching:
 | `query-params` | list endpoint query strings |
 | `mongoose-migrations` | data migrations under `scripts/` |
 | `comment-placement` | where a comment may sit, in any file |
+| `plain-english` | the wording of every comment and document |
 
 Unknown browser routes receive a responsive HTML 404 page. Unknown `/api/*`
 routes receive a JSON 404 response.

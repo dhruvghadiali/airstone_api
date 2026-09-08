@@ -2,6 +2,7 @@ const joi = require("joi");
 
 const { user_validation_messages } = require("@validators/messages");
 const {
+  validation_patterns,
   user_validation_limits,
   user_validation_patterns,
 } = require("@validators/constants");
@@ -88,7 +89,7 @@ const email = joi
   .lowercase()
   .min(user_validation_limits.EMAIL_MIN)
   .max(user_validation_limits.EMAIL_MAX)
-  .pattern(user_validation_patterns.EMAIL)
+  .pattern(validation_patterns.EMAIL)
   .required()
   .messages({
     "any.required": user_validation_messages.EMAIL_REQUIRED,
@@ -112,7 +113,7 @@ const phone_number = joi
   .trim()
   .min(user_validation_limits.PHONE_NUMBER_MIN)
   .max(user_validation_limits.PHONE_NUMBER_MAX)
-  .pattern(user_validation_patterns.PHONE_NUMBER)
+  .pattern(validation_patterns.PHONE_NUMBER)
   .required()
   .messages({
     "any.required": user_validation_messages.PHONE_NUMBER_REQUIRED,

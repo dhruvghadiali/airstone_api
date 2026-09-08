@@ -22,6 +22,7 @@ const {
   sort_order,
   sort_defaults,
   validation_limits,
+  validation_patterns,
 } = require("@validators/constants/common");
 const {
   list_query_limits,
@@ -34,6 +35,16 @@ const {
   user_validation_limits,
   user_validation_patterns,
 } = require("@validators/constants/user_constants");
+const {
+  company_contact_validation_limits,
+} = require("@validators/constants/company_contact_constants");
+const {
+  company_validation_limits,
+  company_validation_patterns,
+} = require("@validators/constants/company_constants");
+const {
+  company_address_validation_limits,
+} = require("@validators/constants/company_address_constants");
 
 module.exports = {
   app_time,
@@ -46,8 +57,13 @@ module.exports = {
   sort_order,
   sort_defaults,
   validation_limits,
+  validation_patterns,
   list_query_limits,
   list_query_error_codes,
   user_validation_limits,
   user_validation_patterns,
+  company_validation_limits,
+  company_validation_patterns,
+  company_contact_validation_limits,
+  company_address_validation_limits,
 };

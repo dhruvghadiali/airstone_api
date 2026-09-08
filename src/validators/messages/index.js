@@ -22,6 +22,18 @@ const {
   user_messages,
   user_validation_messages,
 } = require("@validators/messages/user_message");
+const {
+  company_messages,
+  company_validation_messages,
+} = require("@validators/messages/company_message");
+const {
+  company_contact_messages,
+  company_contact_validation_messages,
+} = require("@validators/messages/company_contact_message");
+const {
+  company_address_messages,
+  company_address_validation_messages,
+} = require("@validators/messages/company_address_message");
 
 module.exports = {
   error_messages,
@@ -29,4 +41,10 @@ module.exports = {
   list_query_validation_messages,
   user_messages,
   user_validation_messages,
+  company_messages,
+  company_validation_messages,
+  company_contact_messages,
+  company_contact_validation_messages,
+  company_address_messages,
+  company_address_validation_messages,
 };

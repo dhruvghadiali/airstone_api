@@ -42,6 +42,34 @@ const validation_limits = Object.freeze({
 });
 
 /**
+ * The formats that no single feature owns.
+ *
+ * An email address is an email address whether a user or a company holds it. A
+ * PIN code is a PIN code wherever an address is stored. Each of these is one
+ * rule, so it is written once. A second copy is a copy that drifts.
+ *
+ * A format that only one feature will ever use does not belong here. It stays
+ * in that feature's own constants file, the way `EMP_ID` stays with the user.
+ *
+ * `EMAIL` is loose on purpose. It catches the obvious mistake -- no `@`, no
+ * dot, a space in the middle. It does not match the full email specification. A
+ * regex that does is unreadable, and it still cannot prove that an address
+ * receives mail.
+ *
+ * `PHONE_NUMBER` is ten digits. No country code, no spaces, no punctuation. The
+ * business works in one country, so a number is stored the way it is dialled
+ * there.
+ *
+ * `PINCODE` is six digits and cannot start with a zero. The first digit is the
+ * postal region, and those run 1 to 8.
+ */
+const validation_patterns = Object.freeze({
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PINCODE: /^[1-9][0-9]{5}$/,
+  PHONE_NUMBER: /^\d{10}$/,
+});
+
+/**
  * Money is stored as a plain number, and the paisa is the smallest unit any
  * amount anywhere in the system may carry.
  *
@@ -80,4 +108,5 @@ module.exports = {
   sort_order,
   sort_defaults,
   validation_limits,
+  validation_patterns,
 };

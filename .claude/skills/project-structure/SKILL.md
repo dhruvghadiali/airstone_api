@@ -31,6 +31,7 @@ read the skill that owns the layer you are touching.
 | Express middleware | `src/middlewares/` | this file |
 | Data migrations | `scripts/migrations/` | `mongoose-migrations` |
 | Where a comment may sit | everywhere | `comment-placement` |
+| How a comment or document is worded | everywhere | `plain-english` |
 
 **Never invent a new top-level folder.** If something fits nowhere above, it is nearly always a
 helper or a util — see §3.

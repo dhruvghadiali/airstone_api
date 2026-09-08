@@ -53,9 +53,13 @@ const user_validation_limits = Object.freeze({
   EMP_ID_MAX: 7,
 });
 
+/**
+ * The employee id format, and nothing else.
+ *
+ * A user's email and phone number formats are not here. They are the same
+ * formats a company's are, so they live in `validation_patterns` in `common`.
+ */
 const user_validation_patterns = Object.freeze({
-  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_NUMBER: /^\d{10}$/,
   EMP_ID: /^[A-Za-z0-9]{7}$/,
 });
 
