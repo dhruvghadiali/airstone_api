@@ -5,6 +5,10 @@
  * formats a user's are, so both read `validation_patterns` in `common`. Their
  * lengths still come from `user_validation_limits`.
  *
+ * `ADDRESS_LIST_MIN_ITEMS` is about the `address` array the create endpoint
+ * takes, not about an address. A company is entered with the place it trades
+ * from, so one address is the floor.
+ *
  * `GST_NUMBER_LENGTH` and `PAN_NUMBER_LENGTH` are single fixed lengths, not
  * ranges, so they take no MIN/MAX pair. The patterns are what actually reject a
  * malformed number; the lengths exist so the model can say what it expects
@@ -15,6 +19,7 @@
  * that state. The letter Z. A checksum character.
  */
 const company_validation_limits = Object.freeze({
+  ADDRESS_LIST_MIN_ITEMS: 1,
   COMPANY_NAME_MIN: 2,
   COMPANY_NAME_MAX: 150,
   GST_NUMBER_LENGTH: 15,

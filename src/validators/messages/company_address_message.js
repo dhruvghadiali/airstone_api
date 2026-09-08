@@ -7,6 +7,10 @@ const {
  * in the body points at no company, or at one that has been deactivated. The
  * controller raises it before the write; the schema only declares the `ref`.
  *
+ * `CONTACT_PERSON_LIST_*` are about the `contact_person` array a create body
+ * nests under each address. The contact's own wording lives in
+ * `company_contact_validation_messages`.
+ *
  * `PINCODE_MIN` and `PINCODE_MAX` read identically because a PIN code is one
  * fixed length rather than a range. Both are spelled out so the request
  * validator has a message for either side of the bound and never has to invent
@@ -37,6 +41,9 @@ const company_address_validation_messages = Object.freeze({
   PINCODE_MIN: `Pincode must be exactly ${company_address_validation_limits.PINCODE_LENGTH} digits`,
   PINCODE_MAX: `Pincode must be exactly ${company_address_validation_limits.PINCODE_LENGTH} digits`,
   PINCODE_INVALID: `Pincode must be ${company_address_validation_limits.PINCODE_LENGTH} digits and cannot start with zero`,
+  CONTACT_PERSON_LIST_REQUIRED: "At least one contact person is required",
+  CONTACT_PERSON_LIST_BASE: "Contact person must be a list of contacts",
+  CONTACT_PERSON_LIST_MIN: `An address needs at least ${company_address_validation_limits.CONTACT_PERSON_LIST_MIN_ITEMS} contact person`,
   IS_ACTIVE_BASE: "Active flag must be a boolean",
   CREATED_BY_REQUIRED: "Created by is required",
   CREATED_BY_BASE: "Created by must be a string",

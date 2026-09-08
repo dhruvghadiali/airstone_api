@@ -79,6 +79,26 @@ Send the returned JWT with every authenticated request as
 `Authorization: Bearer <token>`. `authenticate_user` reads the token and
 `authorize_user_types(...)` narrows a route to specific roles.
 
+### Companies
+
+- `POST /admin/companies` — create a company with its addresses and their
+  contacts. Admin only
+
+The body accepts `company_name`, `company_type`, `email`, `phone_number`,
+`gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
+`customer` or `both`.
+
+`address` is a list and needs at least one entry. Each entry accepts `address`,
+`pincode` and `contact_person`. `contact_person` is a list and needs at least
+one entry; each contact accepts `name`, `phone_number` and `position`.
+`position` is one of `owner`, `manager`, `accounts`, `purchase`, `sales` or
+`other`.
+
+`is_active`, `created_by` and `updated_by` are set by the server and are
+rejected if sent. The three collections are written in one transaction, so the
+endpoint needs MongoDB running as a replica set. The reply mirrors the request
+with the new ids in place.
+
 ## Migrations
 
 Backfills are declared in `scripts/generator/backfill_config.js` and turned into

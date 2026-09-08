@@ -20,6 +20,10 @@ const company_types = Object.values(company_type).join(", ");
  * falls back to `error_messages.DUPLICATE_VALUE`, which does not say which of
  * the two numbers the caller has already used.
  *
+ * `ADDRESS_LIST_*` are about the `address` array in a create body, not about an
+ * address. The address's own wording lives in
+ * `company_address_validation_messages`, so the two never share a key.
+ *
  * `EMAIL_MIN`, `EMAIL_MAX`, `PHONE_NUMBER_MIN` and `PHONE_NUMBER_MAX`
  * interpolate `user_validation_limits` rather than a company constant of their
  * own, because the company model holds a company's email and phone to the same
@@ -73,6 +77,9 @@ const company_validation_messages = Object.freeze({
   PAN_NUMBER_MAX: `PAN number must be exactly ${company_validation_limits.PAN_NUMBER_LENGTH} characters`,
   PAN_NUMBER_INVALID:
     "PAN number must be five letters, four digits and one letter",
+  ADDRESS_LIST_REQUIRED: "At least one address is required",
+  ADDRESS_LIST_BASE: "Address must be a list of addresses",
+  ADDRESS_LIST_MIN: `A company needs at least ${company_validation_limits.ADDRESS_LIST_MIN_ITEMS} address`,
   IS_ACTIVE_BASE: "Active flag must be a boolean",
   CREATED_BY_REQUIRED: "Created by is required",
   CREATED_BY_BASE: "Created by must be a string",
