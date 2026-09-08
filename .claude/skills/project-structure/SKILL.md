@@ -21,7 +21,7 @@ read the skill that owns the layer you are touching.
 | Role routers, feature routers, route files | `src/routes/<role>/<feature>/` | `route-structure`, `route-comments` |
 | Request handlers | `src/controllers/<feature>/` | `controller-structure`, `controller-comments` |
 | Shared logic and queries | `src/helpers/<feature>/` | `helper-structure`, `helper-comments` |
-| Mongoose schemas | `src/models/` | `model-structure`, `model-comments` |
+| Mongoose schemas | `src/models/<entity>/` | `model-structure`, `model-comments` |
 | Pure logic — no database, no `req`, no `res` | `src/utils/` | `utils-structure` |
 | Frozen value sets | `src/enums/<entity>_enums.js` | `enum-structure`, `enum-comments` |
 | The validators tree, `constants/`, `messages/` | `src/validators/` | `validators-structure` |
@@ -200,7 +200,7 @@ No logic in a barrel. No conditionals, no re-shaping, no computed exports.
 
 In this order, so each step has what it needs:
 
-1. **Model** — `src/models/<feature>_model.js`, plus its limits, patterns and messages.
+1. **Model** — `src/models/<feature>/<feature>_model.js` and its `index.js` barrel, plus its limits, patterns and messages.
    → `model-structure`, and `enum-structure` for any fixed value set
 2. **Validators** — request body, route params, and the list query config.
    → `request-body-structure`, `route-params-structure`, `query-params`

@@ -137,7 +137,7 @@ For enums specifically, `enum-comments` has the detail.
 
 ## 6. Worked example
 
-`src/models/user_model.js` carries exactly three comments, and each earns its place:
+`src/models/user/user_model.js` carries exactly three comments, and each earns its place:
 
 - the file-level note that passwords are hidden two different ways;
 - the `pre("save")` note explaining why the hash is guarded by `isModified` — without it, every

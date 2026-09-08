@@ -26,7 +26,7 @@ those checks with the project's database helpers.
 | Validation limits and patterns | `src/validators/constants/<feature>_constants.js` | `@validators/constants` |
 | Validation messages | `src/validators/messages/<feature>_message.js` | `@validators/messages` |
 | Route middleware | `src/middlewares/validate_request.js` | `@middlewares/validate_request` |
-| Mongoose shape | `src/models/<feature>_model.js` | `@models/<feature>_model` |
+| Mongoose shape | `src/models/<feature>/<feature>_model.js` | `@models/<feature>` |
 
 Use CommonJS `require(...)` and project aliases. Match the existing file's quote and indentation
 style when editing; new files should follow the repository's established style.

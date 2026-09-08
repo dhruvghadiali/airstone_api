@@ -32,7 +32,7 @@ A column can never be filterable in one and unknown in the other, because there 
 - `src/validators/query_params/<feature>/list_<feature>_config.js` — the composed config
 - `src/validators/query_params/<feature>/list_<feature>_query_validator.js` — the schema instance
 - `src/validators/query_params/<feature>/index.js` and `src/validators/query_params/index.js` — barrels
-- `src/validators/query_params/list_query_schema.js` — the shared schema builder
+- `src/validators/query_params/factory/` — the shared schema builders
 - Pagination and sort defaults in `src/validators/constants/common.js`
 
 **Out of scope — read, never edited by this skill**
@@ -58,7 +58,7 @@ config to work around a missing builder feature; §11 covers how to add it prope
 | Schema instance | `src/validators/query_params/<feature>/list_<feature>_query_validator.js` | via the feature barrel |
 | Feature barrel | `src/validators/query_params/<feature>/index.js` | — |
 | Root barrel | `src/validators/query_params/index.js` | `@validators/query_params` |
-| Shared schema builder | `src/validators/query_params/list_query_schema.js` | `@validators/query_params/list_query_schema` |
+| Shared schema builders | `src/validators/query_params/factory/` | `@validators/query_params/factory` |
 | Query builder | `src/helpers/list_query/utils/build_list_query.js` | `@helpers/list_query` |
 | Pagination / sort defaults | `src/validators/constants/common.js` | `@validators/constants` |
 | Messages | `src/validators/messages/` | `@validators/messages` |

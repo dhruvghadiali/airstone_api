@@ -1,4 +1,4 @@
-const user_model = require("@models/user_model");
+const { user_model } = require("@models/user");
 
 const { retry_when } = require("@helpers/common");
 const {

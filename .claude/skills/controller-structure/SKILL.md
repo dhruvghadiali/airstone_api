@@ -44,7 +44,7 @@ Before writing a controller, confirm each of these exists. Report the missing on
 
 | Needed | Location | Example |
 |---|---|---|
-| Model | `src/models/<feature>_model.js` | `user_model` |
+| Model | `src/models/<feature>/<feature>_model.js` | `user_model` |
 | Success + error messages | `src/validators/messages/<feature>_message.js` | `employee_messages.CREATED` |
 | Request-body schema (create / update) | `src/validators/request_body/<feature>/` | `create_employee_schema` |
 | Route-param validator (get / update / delete) | `src/validators/route_params/` | `employee_id_params_validator` |
@@ -58,7 +58,7 @@ Before writing a controller, confirm each of these exists. Report the missing on
 | What | Path | Import |
 |---|---|---|
 | Controllers | `src/controllers/<feature>/<action>_<feature>.js` | `@controllers/<feature>` |
-| Models | `src/models/<feature>_model.js` | `@models/<feature>_model` |
+| Models | `src/models/<feature>/<feature>_model.js` | `@models/<feature>` (barrel only) |
 | Enums (barrel) | `src/enums/index.js` | `@enums` |
 | Messages (barrel) | `src/validators/messages/index.js` | `@validators/messages` |
 | Constants (barrel) | `src/validators/constants/index.js` | `@validators/constants` |
@@ -147,7 +147,7 @@ Sections in this exact order:
 const _ = require("lodash");
 
 // 2. models, then app_error
-const product_model = require("@models/product_model");
+const { product_model } = require("@models/product");
 const app_error = require("@middlewares/app_error");
 
 // 3. single-line destructured requires, sorted by line length, shortest first
@@ -224,14 +224,17 @@ return send_response(res, http_status.CREATED, product_messages.CREATED, product
 return send_response(res, http_status.OK, employee_messages.DELETED);
 ```
 
-- Signature: `send_response(res, status, message, data = [])`.
+- Signature: `send_response(res, status, message, data = {})`.
 - Never `res.json(...)`, `res.send(...)` or `res.status(...)` directly. Never call `next()` on the
   success path.
-- `send_response` normalises `data` — a single document is wrapped, `null`/`undefined` becomes `[]`.
-  A controller with nothing to return simply omits the fourth argument (see `delete_employee`).
+- **`data` is always an object.** `null`/`undefined` becomes `{}`, so a controller with nothing to
+  return simply omits the fourth argument (see `delete_employee`). An **array throws a
+  `TypeError`** — `send_response` will not guess a key for it.
+- A list therefore never goes in as the payload itself. It goes under a name inside the object, as
+  `list_employees` does with `{ employees, summary, sort, pagination }`. The key is the resource
+  plural, so `data.employees` reads for itself; per-field failures use `errors`, which the error
+  handler owns.
 - Status codes: `CREATED` for create, `OK` for everything else. From `@enums`, never a literal.
-- Multiple values go in one object literal as the fourth argument, as `list_employees` does with
-  `{ employees, summary, sort, pagination }`.
 
 ---
 
@@ -543,6 +546,14 @@ than restated.
 `src/helpers/<feature>/constants/<feature>_response.js` — one per feature, exported through the
 feature's barrel.
 
+**A second config in the same feature is allowed only when the feature answers with two genuinely
+different kinds of payload.** `auth` has two: `auth_response` describes the person who just signed
+in, and `signup_response` describes an account somebody else just created — so it carries `emp_id`
+and `is_active`, which a signin reply has no use for, and no token. Two configs because the payloads
+differ in what they *are*, not because two endpoints wanted different columns. If the only
+difference is which columns an action returns, that is a named action key inside the one config
+(`create`, `list`, `get`), not a second file.
+
 ```js
 const { company_ref } = require("@helpers/company");
 
@@ -681,7 +692,7 @@ return send_response(
 );
 ```
 
-`project(document, select)` lives in `src/utils/projection.js` — it is pure, so by §10 it is a util
+`project(document, select)` lives in `src/utils/projection/` — it is pure, so by §10 it is a util
 and not a helper. It is a thin wrapper over `_.pick` on the document's `toJSON()` output, which
 handles dotted paths and leaves the populated subdocuments as the populate `select` already shaped
 them. Do **not** re-read the document from the database just to apply a projection; that is a round

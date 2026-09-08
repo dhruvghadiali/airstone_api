@@ -30,7 +30,7 @@ them here. Only note, when reporting, that they need to follow.
 
 | What | Path | Import alias |
 |---|---|---|
-| Models | `src/models/<entity>_model.js` | `@models/<entity>_model` |
+| Models | `src/models/<entity>/<entity>_model.js` | `@models/<entity>` |
 | Enums (fixed value sets) | `src/enums/<entity>_enums.js` | `@enums` |
 | Validation limits + patterns | `src/validators/constants/<entity>_constants.js` | `@validators/constants` |
 | Validation + response messages | `src/validators/messages/<entity>_message.js` | `@validators/messages` |
@@ -45,6 +45,11 @@ you must register the alias in **both**.
 
 - Filenames: `snake_case`, suffixed by role — `_model.js`, `_enums.js`, `_constants.js`,
   `_message.js`, `_helper.js`.
+- Each model lives in its own folder named after the entity, holding
+  `<entity>_model.js` and an `index.js` barrel: `src/models/order/order_model.js` plus
+  `src/models/order/index.js`. The folder gives a model that later grows companion
+  files — sub-schemas, static queries, a seed — somewhere to put them, instead of the
+  top of `src/models/` filling with loose files.
 - Database fields: `snake_case`.
 - Exported constant/message objects: `snake_case`, `Object.freeze`d — `product_validation_limits`,
   `product_validation_messages`.
@@ -63,6 +68,11 @@ you must register the alias in **both**.
 
 `src/enums`, `src/validators/constants` and `src/validators/messages` are **barrel folders**. Their
 `index.js` is the only public import point.
+
+Each model folder is a barrel too, in the same way: `src/models/<entity>/index.js` re-exports the
+model, so every consumer writes `const { <entity>_model } = require("@models/<entity>");` — a
+destructured import, never a default one. A model folder without an `index.js` is the same bug as
+an unregistered constants file.
 
 When you create or update a file in any of those folders, you must:
 
@@ -257,6 +267,17 @@ order_schema.pre("save", async function hash_something() {
 module.exports = mongoose.model("Order", order_schema);
 ```
 
+And its barrel, `src/models/order/index.js`:
+
+```js
+/**
+ * The order model, behind one import: `require("@models/order")`.
+ */
+const order_model = require("@models/order/order_model");
+
+module.exports = { order_model };
+```
+
 ### Mandatory on every model
 
 - `new mongoose.Schema(...)` — the project does not destructure `Schema`.
@@ -419,7 +440,7 @@ other file:
 ```js
 const mongoose = require("mongoose");
 
-const product_model = require("@models/product_model");
+const { product_model } = require("@models/product");
 
 const is_active_product_exists = async (value) => {
   // A null/undefined value is left to the field's own `required` rule.
@@ -514,7 +535,7 @@ it — its `*_MIN` / `*_MAX` limits, its pattern, its `_REQUIRED` / `_BASE` / `_
 and from every `schema.index(...)` compound key, rebuilding the remaining key order deliberately
 rather than just deleting the entry. Grep the field name across `src/` before declaring done.
 
-**Removing a model:** delete `src/models/<entity>_model.js`, then
+**Removing a model:** delete the whole `src/models/<entity>/` folder — model file and barrel — then
 
 - delete `<entity>_constants.js`, `<entity>_message.js`, `<entity>_enums.js` and **unregister each
   from its barrel `index.js`** — both the `require` line and the `module.exports` entry;
@@ -621,6 +642,7 @@ Before reporting a model change complete, verify:
       contains no `require("@helpers/common")` — grep for it and expect nothing.
 - [ ] Every `ref` field added has a matching guard in the controller that writes it, reported by
       name, and every write path that skips the guard is called out.
+- [ ] The model sits at `src/models/<entity>/<entity>_model.js` with an `index.js` barrel beside it, and every consumer imports `{ <entity>_model }` from `@models/<entity>`.
 - [ ] All limits exist in a `<entity>_constants.js` and that file is registered in `src/validators/constants/index.js`.
 - [ ] All messages exist in a `<entity>_message.js`, interpolate their limits, and both exports are registered in `src/validators/messages/index.js`.
 - [ ] All enums are `Object.freeze`d, in `src/enums/<entity>_enums.js`, registered in `src/enums/index.js`.
@@ -633,7 +655,7 @@ Before reporting a model change complete, verify:
 - [ ] All of these load without error. The first three are the cycle check — a model, the helper and
       the app must each be safe as the *first* thing loaded, because a require cycle only bites on
       one particular entry order:
-      `node -e "require('module-alias/register'); require('./src/models/<entity>_model.js')"`
+      `node -e "require('module-alias/register'); require('@models/<entity>')"`
       `node -e "require('module-alias/register'); require('@helpers/common')"`
       `node -e "require('module-alias/register'); require('@src/app')"`
       `node -e "require('module-alias/register'); require('@enums'); require('@validators/constants'); require('@validators/messages')"`
@@ -671,7 +693,7 @@ Before reporting a model change complete, verify:
 `src/validators/constants/order_constants.js` → `src/validators/constants/index.js` →
 `src/validators/messages/order_message.js` → `src/validators/messages/index.js` →
 `src/helpers/common/db/` (if a ref lookup is needed) →
-`src/models/order_model.js`.
+`src/models/order/order_model.js` → `src/models/order/index.js`.
 
 **Step 3** — run the section 11 checklist. Report which files were created versus reused, and note
 that the order request-body / query / param validators, controllers, routes, README and REST Client

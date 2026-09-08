@@ -137,12 +137,53 @@ another path, mount the more specific route first. For example, mount `/:id/reas
 
 Role-specific rules:
 
-- Apply `authenticate_user` and `authorize_user_types(...)` once at the feature router boundary.
+- Apply `authenticate_user` and `authorize_user_types(...)` once at the feature router boundary —
+  **but only when every route under that router is protected.** See "Mixed routers" below.
 - Read-only role mirrors may compose only list/get routes; do not expose create/update/delete by
   copying a writable feature router.
-- Auth routes are the exception to authenticated feature middleware and must remain public unless
-  the existing role contract says otherwise.
 - Keep role root prefixes and feature prefixes explicit. Do not hide URL prefixes inside leaf files.
+
+### Mixed routers: guards on the leaf route
+
+An `auth` router is not uniformly public. Signin is public; the signups that create an admin or an
+employee are not. A router-level `router.use(authenticate_user, ...)` would lock the public routes
+alongside the protected ones, so on a router carrying both, the guards go **on the individual
+route** instead:
+
+```js
+// src/routes/super_admin/auth/admin_signup_route.js
+router.post(
+  "/admin/signup",
+  authenticate_user,
+  authorize_user_types(user_type.SUPER_ADMIN),
+  validate_body(admin_signup_schema),
+  async_handler(admin_signup),
+);
+```
+
+The rule, stated once:
+
+| The router's routes are | Put the guards |
+|---|---|
+| all protected | once on the feature router, as in §4 above |
+| a mix of public and protected | on each protected leaf route |
+| all public (`signin`, the bootstrap signup) | nowhere |
+
+The cost of leaf-level guards is that a new route can be added and left unguarded by forgetting a
+line, which the router-level form prevents. So prefer the router boundary whenever the router allows
+it, and when you do use the leaf form, say in your report which routes carry guards and which are
+deliberately public.
+
+**Signup path naming.** A signup lives under the router of whoever calls it, and names the role it
+creates in the path: a super admin creates an admin at `/super-admin/auth/admin/signup`, and an
+admin creates an employee at `/admin/auth/employee/signup`. The bootstrap signup
+(`/super-admin/auth/signup`) is the exception — nobody calls it, so it is filed under the role it
+creates.
+
+**Fixing the created role.** Any route that creates an account pairs a leaf guard with a controller
+that hard-codes the new account's `user_type`, and a Joi schema declaring `.unknown(false)` so a
+`user_type` in the body is a 400 rather than a silently ignored field. All three are required; two
+of the three is a hole.
 
 ## 5. Role roots and application mounting
 

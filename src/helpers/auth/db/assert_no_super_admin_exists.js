@@ -1,4 +1,4 @@
-const user_model = require("@models/user_model");
+const { user_model } = require("@models/user");
 const app_error = require("@middlewares/app_error");
 
 const { http_status, user_type } = require("@enums");

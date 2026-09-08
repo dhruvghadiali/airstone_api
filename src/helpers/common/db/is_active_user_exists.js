@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const user_model = require("@models/user_model");
+const { user_model } = require("@models/user");
 
 /**
  * Checks that a reference points at a user who exists and is still active.

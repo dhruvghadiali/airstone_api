@@ -94,7 +94,7 @@ makes every error reply look the same.
 | Validators | `src/validators/` | Input shape, limits, patterns, wording | Touch the database |
 | Controllers | `src/controllers/<feature>/` | Run one address end to end | Query the database directly |
 | Helpers | `src/helpers/<feature>/` | Database work and plain logic | Reach inside another helper folder |
-| Models | `src/models/` | The shape of stored data and its hooks | Hold address logic |
+| Models | `src/models/<name>/` | The shape of stored data and its hooks | Hold address logic |
 | Enums, utils | `src/enums/`, `src/utils/` | Shared fixed values and plain functions | Depend on Express |
 
 **One door per helper folder.** Each helper folder (`auth`, `common`,
@@ -103,6 +103,12 @@ single `index.js`. Code outside imports only `@helpers/<name>`, never a path
 inside it. This means a file can move between those three folders without
 breaking anyone. A helper moves into `helpers/common` only after a second
 feature needs it. Until then it stays with the feature that uses it.
+
+**One folder per model.** Each model gets its own folder under `models/` with
+its own `index.js`, so `require("@models/user")` returns `{ user_model }`. A
+model that later grows companion files — sub-schemas, static queries, a seed —
+then has somewhere to put them, instead of the top of `models/` filling up with
+loose files as the system grows.
 
 ### 3.3 Short import names
 
@@ -126,7 +132,7 @@ src/
                        constants | db | utils
   middlewares/         app_error, async_handler, authenticate_user,
                        error_handler, not_found_handler, validate_request
-  models/user_model.js
+  models/user/         the user model, behind its own index
   public/              images, styles, and the 404 page
   routes/              super_admin/, admin/, employee/ — each with auth/
   utils/               projection/, financial_year/, constants/
@@ -483,16 +489,19 @@ page information has somewhere to sit:
 {
   "status": 200,
   "data": {
-    "items": [ { "_id": "...", "username": "amit" } ],
+    "employees": [ { "_id": "...", "username": "amit" } ],
+    "sort": { "field": "created_at", "direction": "desc" },
     "pagination": { "page": 1, "limit": 20, "total": 37 }
   },
-  "message": "Users fetched successfully"
+  "message": "Employees fetched successfully"
 }
 ```
 
-`items` and `pagination` are the names reserved for the list addresses planned
-for a later version. The builders in `validators/query_params/` already produce
-the page settings they need.
+The list is keyed by the **resource plural**, not a generic name, so
+`data.employees` reads for itself. `sort` and `pagination` sit beside it. This is
+the shape the list addresses will use when they are built; the builders in
+`helpers/list_query` and `validators/query_params/` already produce those two
+pieces.
 
 #### How this is kept true
 
@@ -500,7 +509,7 @@ the page settings they need.
 or a plain value, it **throws an error on purpose**.
 
 It does not quietly wrap a stray list, because the right name is different for
-each address — `items` for a list of records, `errors` for bad fields. Guessing
+each address — the resource plural for a list, `errors` for bad fields. Guessing
 would put a different name in the reply depending on who called. Throwing shows
 the mistake while the developer is still writing the code, where fixing it costs
 nothing.
@@ -804,7 +813,7 @@ We use the Node test runner with supertest. At a minimum:
 | FR-3.4, FR-3.5 | `authorize_user_types` (5.4) |
 | FR-4.1 to FR-4.4 | Employee ID and its retry (4.4) |
 | FR-5.1, FR-5.2 | `send_response` always returns an object, `{}` when empty (6.2) |
-| FR-5.3 | The reserved `items` and `pagination` names (6.2) |
+| FR-5.3 | A list keyed by its resource plural, beside `sort` and `pagination` (6.2) |
 | FR-5.4 | `as_error_data` puts field problems under `errors` (6.3) |
 | FR-5.5 | The 500 case returns a general message and `{}` (6.3) |
 
