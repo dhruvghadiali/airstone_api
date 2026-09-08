@@ -29,6 +29,7 @@ const {
 } = require("@validators/constants/list_query_constants");
 const {
   PASSWORD_SALT_ROUNDS,
+  DEFAULT_USER_PASSWORD,
   emp_id_generation,
   user_validation_limits,
   user_validation_patterns,
@@ -39,6 +40,7 @@ module.exports = {
   financial_year,
   money_precision,
   PASSWORD_SALT_ROUNDS,
+  DEFAULT_USER_PASSWORD,
   emp_id_generation,
   pagination_defaults,
   sort_order,

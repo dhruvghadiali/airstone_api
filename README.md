@@ -54,20 +54,26 @@ signin opens only that role's routes.
 
 ## Routes
 
-- `GET /super-admin` — availability check
-- `GET /admin` — availability check
-- `GET /employee` — availability check
-
 ### Auth
 
-- `POST /super-admin/auth/signup` — bootstrap the first super admin account
+- `POST /super-admin/auth/signup` — create the one super admin account;
+  refused once it exists. Public
+- `POST /super-admin/auth/admin/signup` — create an admin. Super admin only
+- `POST /admin/auth/employee/signup` — create an employee. Admin only
 - `POST /super-admin/auth/signin`
 - `POST /admin/auth/signin`
 - `POST /employee/auth/signin`
 
-Signup accepts `first_name`, `last_name`, `email`, `phone_number`, `username`
-and `password`. `emp_id` and `user_type` are set by the server and are rejected
-if sent. Signin accepts `username` and `password` only.
+A signup sits under the router of whoever calls it, and names the role it
+creates in the path. The super admin signup is the exception, since nobody
+calls it.
+
+The super admin signup accepts `first_name`, `last_name`, `email`,
+`phone_number`, `username` and `password`. The admin and employee signups accept
+the same list without `password`; those accounts start on
+`DEFAULT_USER_PASSWORD` in `@validators/constants`, and the creator passes it
+on. `emp_id` and `user_type` are always set by the server and are rejected if
+sent. Signin accepts `username` and `password` only.
 
 Send the returned JWT with every authenticated request as
 `Authorization: Bearer <token>`. `authenticate_user` reads the token and

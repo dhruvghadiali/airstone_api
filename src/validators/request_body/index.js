@@ -11,14 +11,18 @@
  */
 const {
   admin_signin_schema,
+  admin_signup_schema,
   employee_signin_schema,
+  employee_signup_schema,
   super_admin_signin_schema,
   super_admin_signup_schema,
 } = require("@validators/request_body/auth");
 
 module.exports = {
   admin_signin_schema,
+  admin_signup_schema,
   employee_signin_schema,
+  employee_signup_schema,
   super_admin_signin_schema,
   super_admin_signup_schema,
 };

@@ -9,12 +9,18 @@
  *   db/         reads against the users collection
  *   utils/      pure logic: tokens, employee id formatting, error translation
  */
-const { auth_response, CREDENTIAL_SELECT } = require("@helpers/auth/constants");
+const {
+  auth_response,
+  signup_response,
+  CREDENTIAL_SELECT,
+} = require("@helpers/auth/constants");
 const {
   get_next_emp_id,
   assert_caller_password,
   get_last_emp_id_sequence,
   authenticate_by_user_type,
+  assert_no_super_admin_exists,
+  create_managed_user,
 } = require("@helpers/auth/db");
 const {
   format_emp_id,
@@ -30,11 +36,14 @@ const {
 
 module.exports = {
   auth_response,
+  signup_response,
   CREDENTIAL_SELECT,
   get_next_emp_id,
   assert_caller_password,
   get_last_emp_id_sequence,
   authenticate_by_user_type,
+  assert_no_super_admin_exists,
+  create_managed_user,
   format_emp_id,
   get_jwt_secret,
   verify_auth_token,

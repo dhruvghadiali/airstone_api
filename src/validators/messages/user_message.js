@@ -17,8 +17,12 @@ const user_types = Object.values(user_type).join(", ");
 const user_messages = Object.freeze({
   CREATED: "Super admin account created successfully",
   SIGNED_IN: "Super admin signed in successfully",
+  ADMIN_CREATED: "Admin account created successfully",
+  EMPLOYEE_CREATED: "Employee account created successfully",
   ADMIN_SIGNED_IN: "Admin signed in successfully",
   EMPLOYEE_SIGNED_IN: "Employee signed in successfully",
+  SUPER_ADMIN_ALREADY_EXISTS:
+    "A super admin account already exists, so another cannot be created",
   ALREADY_EXISTS:
     "A user with the same username, email, phone number, or employee id already exists",
   INVALID_CREDENTIALS: "Invalid username or password",

@@ -3,6 +3,22 @@ const { app_time } = require("@validators/constants/common");
 const PASSWORD_SALT_ROUNDS = 12;
 
 /**
+ * The password every account created by a super admin or an admin starts with.
+ *
+ * It is the same for everyone and it is written here in the source, so treat it
+ * as public knowledge rather than as a secret. It is a starting point for a
+ * brand new account, not protection for it.
+ *
+ * Two things follow from that, and both are still to be built:
+ *   - a new user must be made to change it the first time they sign in;
+ *   - until they do, their account is only as safe as this file is private.
+ *
+ * It is stored the same way as any other password -- hashed by the model before
+ * it is saved -- so it is never written to the database in plain text.
+ */
+const DEFAULT_USER_PASSWORD = "Aristone@123456";
+
+/**
  * emp_id is generated as <2-digit year><2-digit month><3-digit sequence>, e.g.
  * 2612001 is the first employee registered in December 2026. The sequence
  * restarts at 001 whenever the year or the month changes.
@@ -45,6 +61,7 @@ const user_validation_patterns = Object.freeze({
 
 module.exports = {
   PASSWORD_SALT_ROUNDS,
+  DEFAULT_USER_PASSWORD,
   emp_id_generation,
   user_validation_limits,
   user_validation_patterns,

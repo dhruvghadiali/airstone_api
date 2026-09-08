@@ -4,6 +4,19 @@ const { http_status } = require("@enums");
 const { error_messages } = require("@validators/messages");
 const { send_response } = require("@helpers/common");
 
+/**
+ * Every failure that has per-field detail carries it as `{ errors: [...] }`.
+ *
+ * `data` is an object on every response, so a list of field failures has to sit
+ * under a name rather than being the payload itself. `errors` is that name, and
+ * it is always an array even for a single bad field, so a client maps over it
+ * without checking how many there were.
+ *
+ * @param   {Array} errors  Per-field failures.
+ * @returns {{errors: Array}} The list, under the key clients read.
+ */
+const as_error_data = (errors) => ({ errors });
+
 const format_joi_errors = (error) =>
   error.details.map(({ message, path, type }) => ({
     field: path.join("."),
@@ -31,11 +44,16 @@ const format_duplicate_error = (error) => {
 };
 
 const normalize_error = (error) => {
+  // `details` is whatever the thrower passed. An array of field failures is
+  // named like every other one; an object is already the right shape and is
+  // taken as given. Nothing else is guessed at.
   if (error instanceof app_error) {
     return {
       status_code: error.status_code,
       message: error.message,
-      data: error.details,
+      data: Array.isArray(error.details)
+        ? as_error_data(error.details)
+        : error.details,
     };
   }
 
@@ -43,7 +61,7 @@ const normalize_error = (error) => {
     return {
       status_code: http_status.BAD_REQUEST,
       message: error_messages.VALIDATION_FAILED,
-      data: format_joi_errors(error),
+      data: as_error_data(format_joi_errors(error)),
     };
   }
 
@@ -51,7 +69,7 @@ const normalize_error = (error) => {
     return {
       status_code: http_status.BAD_REQUEST,
       message: error_messages.VALIDATION_FAILED,
-      data: format_mongoose_errors(error),
+      data: as_error_data(format_mongoose_errors(error)),
     };
   }
 
@@ -59,13 +77,13 @@ const normalize_error = (error) => {
     return {
       status_code: http_status.BAD_REQUEST,
       message: error_messages.INVALID_IDENTIFIER,
-      data: [
+      data: as_error_data([
         {
           field: error.path,
           message: `Invalid value for ${error.path}`,
           type: "cast_error",
         },
-      ],
+      ]),
     };
   }
 
@@ -73,7 +91,7 @@ const normalize_error = (error) => {
     return {
       status_code: http_status.CONFLICT,
       message: error_messages.DUPLICATE_VALUE,
-      data: format_duplicate_error(error),
+      data: as_error_data(format_duplicate_error(error)),
     };
   }
 

@@ -15,10 +15,18 @@ const {
 const {
   authenticate_by_user_type,
 } = require("@helpers/auth/db/authenticate_by_user_type");
+const {
+  assert_no_super_admin_exists,
+} = require("@helpers/auth/db/assert_no_super_admin_exists");
+const {
+  create_managed_user,
+} = require("@helpers/auth/db/create_managed_user");
 
 module.exports = {
   get_next_emp_id,
   assert_caller_password,
   get_last_emp_id_sequence,
   authenticate_by_user_type,
+  assert_no_super_admin_exists,
+  create_managed_user,
 };
