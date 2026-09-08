@@ -1,0 +1,222 @@
+:root {
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #f4f8fa;
+  color: #0f2135;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 280px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(155, 190, 200, 0.28), transparent 28rem),
+    radial-gradient(circle at 84% 86%, rgba(22, 72, 99, 0.1), transparent 30rem),
+    #f4f8fa;
+}
+
+.error_page {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.error_page::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(22, 72, 99, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 72, 99, 0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  content: "";
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+.glow {
+  position: absolute;
+  z-index: -1;
+  width: min(28rem, 70vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0.22;
+  filter: blur(100px);
+}
+
+.glow_left {
+  top: 8%;
+  left: -15rem;
+  background: #9bbec8;
+}
+
+.glow_right {
+  right: -15rem;
+  bottom: 0;
+  background: #164863;
+}
+
+.error_card {
+  width: min(100%, 47rem);
+  text-align: center;
+}
+
+.brand_link {
+  display: inline-grid;
+  gap: 0.55rem;
+  justify-items: center;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  color: #164863;
+  font-size: 0.73rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.brand_link_logo {
+  display: grid;
+  width: clamp(5rem, 10vw, 6.5rem);
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(22, 72, 99, 0.12);
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 15px 35px rgba(15, 47, 70, 0.12);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.brand_link img {
+  display: block;
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+}
+
+.brand_link_hint {
+  opacity: 0.72;
+  transition: opacity 180ms ease;
+}
+
+.brand_link:hover .brand_link_logo {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 20px 42px rgba(15, 47, 70, 0.18);
+}
+
+.brand_link:hover .brand_link_hint {
+  opacity: 1;
+}
+
+.brand_link:focus-visible {
+  outline: 3px solid rgba(22, 72, 99, 0.32);
+  outline-offset: 5px;
+  border-radius: 0.5rem;
+}
+
+.error_card_visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.25rem, 2vw, 1rem);
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.digit {
+  font-size: clamp(6rem, 20vw, 11rem);
+  font-weight: 850;
+  line-height: 0.72;
+  letter-spacing: -0.09em;
+  color: transparent;
+  -webkit-text-stroke: clamp(2px, 0.35vw, 4px) #164863;
+  text-shadow: 0 12px 35px rgba(22, 72, 99, 0.1);
+}
+
+.socket {
+  position: relative;
+  display: grid;
+  width: clamp(4.8rem, 15vw, 8rem);
+  aspect-ratio: 1;
+  place-items: center;
+  border: clamp(3px, 0.45vw, 5px) solid #164863;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff, #e4eff2);
+  box-shadow:
+    inset 0 0 22px rgba(155, 190, 200, 0.34),
+    0 15px 40px rgba(22, 72, 99, 0.14);
+}
+
+.socket_ring {
+  position: absolute;
+  inset: 10%;
+  border: 1px dashed rgba(22, 72, 99, 0.42);
+  border-radius: inherit;
+}
+
+.socket_bolt {
+  width: 34%;
+  height: 52%;
+  background: #164863;
+  filter: drop-shadow(0 4px 5px rgba(22, 72, 99, 0.22));
+  clip-path: polygon(54% 0, 100% 0, 68% 38%, 92% 38%, 31% 100%, 46% 53%, 15% 53%);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #164863;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #0f2135;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+}
+
+.description {
+  max-width: 35rem;
+  margin: 1.25rem auto 0;
+  color: #526577;
+  font-size: clamp(1rem, 2.5vw, 1.16rem);
+  line-height: 1.7;
+}
+
+@media (max-width: 540px) {
+  .error_page {
+    padding-inline: 1.25rem;
+  }
+
+  .brand_link {
+    margin-bottom: 1.75rem;
+  }
+
+  .error_card_visual {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand_link_logo,
+  .brand_link_hint {
+    transition: none;
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "target": "ES2022",
+    "checkJs": false,
+    "paths": {
+      "@src/*": [
+        "./src/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@controllers/*": [
+        "./src/controllers/*"
+      ],
+      "@enums": [
+        "./src/enums/index.js"
+      ],
+      "@enums/*": [
+        "./src/enums/*"
+      ],
+      "@helpers/*": [
+        "./src/helpers/*"
+      ],
+      "@middlewares/*": [
+        "./src/middlewares/*"
+      ],
+      "@models/*": [
+        "./src/models/*"
+      ],
+      "@routes/*": [
+        "./src/routes/*"
+      ],
+      "@scripts/*": [
+        "./scripts/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@validators/*": [
+        "./src/validators/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.js",
+    "scripts/**/*.js",
+    "test/**/*.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

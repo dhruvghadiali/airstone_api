@@ -1,0 +1,56 @@
+{
+  "name": "airstone_api",
+  "version": "1.0.0",
+  "description": "Express and MongoDB API for AIRSTONE",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "nodemon -r module-alias/register src/server.js",
+    "start": "node dist/server.js",
+    "start:source": "node -r module-alias/register src/server.js",
+    "test": "node -r module-alias/register --test",
+    "migrate:generate": "node scripts/generator/generate.js",
+    "migrate": "node scripts/migrate.js",
+    "migrate:rollback": "node scripts/rollback.js"
+  },
+  "_moduleAliases": {
+    "@src": "src",
+    "@config": "src/config",
+    "@controllers": "src/controllers",
+    "@enums": "src/enums",
+    "@helpers": "src/helpers",
+    "@middlewares": "src/middlewares",
+    "@models": "src/models",
+    "@routes": "src/routes",
+    "@scripts": "scripts",
+    "@utils": "src/utils",
+    "@validators": "src/validators"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "mongoose"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "lodash": "^4.18.1",
+    "module-alias": "^2.3.4",
+    "moment": "^2.30.1",
+    "mongoose": "^9.9.1",
+    "morgan": "^1.11.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}
