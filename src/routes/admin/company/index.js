@@ -8,6 +8,7 @@ const {
 
 const create_company_route = require("@routes/admin/company/create_company_route");
 const delete_company_route = require("@routes/admin/company/delete_company_route");
+const delete_company_address_route = require("@routes/admin/company/delete_company_address_route");
 const update_company_route = require("@routes/admin/company/update_company_route");
 const update_company_contact_route = require("@routes/admin/company/update_company_contact_route");
 const update_company_address_route = require("@routes/admin/company/update_company_address_route");
@@ -29,9 +30,11 @@ const router = express.Router();
  * list route yet, by design rather than by oversight: the endpoints have not
  * been asked for.
  *
- * Delete is a soft delete and it cascades: deactivating a company deactivates
- * its addresses and its contacts in the same transaction. There is no route that
- * reverses it.
+ * Every delete is a soft delete and each cascades downwards only. Deleting a
+ * company deactivates its addresses and its contacts; deleting one address
+ * deactivates that address and the contacts at it, and leaves the company alone,
+ * because closing a branch says nothing about whether the firm is still traded
+ * with. No route reverses any of it.
  *
  * Each update touches one collection and edits that row's own columns only.
  * `PATCH /:id` changes the company, `PATCH /addresses/:id` changes one address,
@@ -48,6 +51,7 @@ router.use(create_company_route);
 router.use(update_company_contact_route);
 router.use(update_company_address_route);
 router.use(update_company_route);
+router.use(delete_company_address_route);
 router.use(delete_company_route);
 
 module.exports = router;

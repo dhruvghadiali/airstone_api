@@ -17,10 +17,14 @@ const {
 const {
   deactivate_company_with_relations,
 } = require("@helpers/company/db/deactivate_company_with_relations");
+const {
+  deactivate_company_address_with_relations,
+} = require("@helpers/company/db/deactivate_company_address_with_relations");
 
 module.exports = {
   is_active_company_exists,
   find_active_company_address,
   create_company_with_relations,
   deactivate_company_with_relations,
+  deactivate_company_address_with_relations,
 };

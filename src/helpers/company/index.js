@@ -24,6 +24,7 @@ const {
   find_active_company_address,
   create_company_with_relations,
   deactivate_company_with_relations,
+  deactivate_company_address_with_relations,
 } = require("@helpers/company/db");
 const {
   company_response,
@@ -42,6 +43,7 @@ module.exports = {
   find_active_company_address,
   create_company_with_relations,
   deactivate_company_with_relations,
+  deactivate_company_address_with_relations,
   company_response,
   company_address_response,
   company_contact_response,

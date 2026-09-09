@@ -88,6 +88,8 @@ Send the returned JWT with every authenticated request as
 - `PATCH /admin/companies/contacts/:id` — change one contact. Admin only
 - `DELETE /admin/companies/:id` — deactivate a company and everything under it.
   Admin only
+- `DELETE /admin/companies/addresses/:id` — deactivate one address and its
+  contacts. Admin only
 
 The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 `gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
@@ -125,13 +127,20 @@ Each update endpoint changes one collection and its own columns only. None of
 them accepts the ids that tie the three together, so an update can never move a
 row to a new parent and leave its children pointing at the old one.
 
-Delete is a soft delete: it sets `is_active` to false on the company, on every
-one of its addresses and on every one of its contacts, in one transaction. It
-takes no body. A company that is already deactivated answers 404, so a repeat
-call cannot overwrite the `updated_by` of the deletion that came first.
+Every delete is a soft delete: it sets `is_active` to false rather than removing
+rows, takes no body, and cascades downwards only.
+
+Deleting a company deactivates the company, every one of its addresses and every
+one of its contacts. Deleting one address deactivates that address and the
+contacts at it, and leaves the company alone — closing a branch says nothing
+about whether the firm is still traded with. Each cascade is one transaction.
+
+A row that is already deactivated answers 404, so a repeat call cannot overwrite
+the `updated_by` of the deletion that came first. Deleting a company's last
+address is allowed, even though create requires at least one.
 
 Nothing reverses a delete. There is no restore route, and no update endpoint
-accepts `is_active`, so bringing a company back is a database job today.
+accepts `is_active`, so bringing a row back is a database job today.
 
 ## Migrations
 
