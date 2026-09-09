@@ -83,6 +83,7 @@ Send the returned JWT with every authenticated request as
 
 - `POST /admin/companies` — create a company with its addresses and their
   contacts. Admin only
+- `PATCH /admin/companies/:id` — change a company's own details. Admin only
 
 The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 `gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
@@ -98,6 +99,11 @@ one entry; each contact accepts `name`, `phone_number` and `position`.
 rejected if sent. The three collections are written in one transaction, so the
 endpoint needs MongoDB running as a replica set. The reply mirrors the request
 with the new ids in place.
+
+The update body accepts the same six company fields, all optional, and needs at
+least one of them. It does not accept `address`: an address and a contact are
+rows of their own and are edited through their own endpoints, which do not exist
+yet. The reply is the company alone.
 
 ## Migrations
 

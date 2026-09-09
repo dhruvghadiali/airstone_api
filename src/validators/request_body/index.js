@@ -19,6 +19,7 @@ const {
 } = require("@validators/request_body/auth");
 const {
   create_company_schema,
+  update_company_schema,
 } = require("@validators/request_body/company");
 
 module.exports = {
@@ -29,4 +30,5 @@ module.exports = {
   super_admin_signin_schema,
   super_admin_signup_schema,
   create_company_schema,
+  update_company_schema,
 };
