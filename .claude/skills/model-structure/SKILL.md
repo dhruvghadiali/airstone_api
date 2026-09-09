@@ -254,16 +254,23 @@ const order_schema = new mongoose.Schema(
   },
 );
 
-// 4. compound and text indexes
+// 4. populate virtuals (only if the model has children — see below)
+order_schema.virtual("lines", {
+  ref: "OrderLine",
+  localField: "_id",
+  foreignField: "order",
+});
+
+// 5. compound and text indexes
 order_schema.index({ name: "text", order_code: "text" });
 order_schema.index({ customer: 1, order_status: 1, is_active: 1 });
 
-// 5. hooks and instance methods (only if needed)
+// 6. hooks and instance methods (only if needed)
 order_schema.pre("save", async function hash_something() {
   /* ... */
 });
 
-// 6. export
+// 7. export
 module.exports = mongoose.model("Order", order_schema);
 ```
 
@@ -284,14 +291,37 @@ module.exports = { order_model };
 - Schema options block always contains, in this order: `timestamps` mapped to
   `{ createdAt: "created_at", updatedAt: "updated_at" }`, `versionKey: false`,
   `toJSON: { flattenMaps: true }`, `toObject: { flattenMaps: true }`. Options go **in the schema
-  constructor**, not via `schema.set(...)`.
+  constructor**, not via `schema.set(...)`. A model that declares a populate virtual adds
+  `virtuals: true` to both serialisers — see below.
 - `is_active: { type: Boolean, default: true, index: true }` — deletes in this project are soft
   deletes that flip this flag.
 - Export via `module.exports = mongoose.model("<PascalCase>", <entity>_schema);`.
 
-This project does **not** currently carry `created_by` / `updated_by` audit fields. Do not add them
-to a single model on your own initiative — if audit trails are wanted, raise it as a cross-cutting
-change so every model gains them together.
+**Audit fields are per model, and the project is split.** The three company models carry
+`created_by` and `updated_by`; `user_model` carries neither. So there is no project-wide default to
+follow, and adding them is a decision to take with the requester rather than on your own
+initiative.
+
+When a model does carry them, they take this shape:
+
+```js
+created_by: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  required: [true, <entity>_validation_messages.CREATED_BY_REQUIRED],
+},
+updated_by: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  default: null,
+},
+```
+
+`updated_by` starts null because a row that has only ever been created has not been updated by
+anyone. Neither is ever accepted from the request body — every create and update schema is
+`.unknown(false)` and declares neither, so the controller sets them from `req.user.id`. They are
+`ref` fields like any other, so §8 applies: the model declares the reference, and whether the id
+points at a live user is the controller's check.
 
 ### Field declaration rules
 
@@ -315,6 +345,45 @@ change so every model gains them together.
   fine; reading another collection to derive a field is not — the controller that already fetched
   that document sets the field.
 - **Never inline a literal number or a literal message string into the schema.**
+
+---
+
+### Populate virtuals
+
+**A child knows its parent. A parent keeps no list.** `company_address` stores its `company`;
+`company_model` stores no array of addresses. A stored array would be a second copy of that fact,
+and the two would drift the first time a child was written without the parent being updated.
+
+The parent reads its children back through a populate virtual:
+
+```js
+company_schema.virtual("addresses", {
+  ref: "CompanyAddress",
+  localField: "_id",
+  foreignField: "company",
+});
+```
+
+Rules:
+
+- **Declared after the schema constructor, before the indexes** — slot 4 in §5.
+- **`virtuals: true` on both serialisers** is what puts a populated virtual into the response:
+  `toJSON: { flattenMaps: true, virtuals: true }` and the same on `toObject`. Without it the
+  populate runs and the result never reaches the client.
+- **It also adds mongoose's own `id` string beside `_id`.** That is why `ALWAYS_INCLUDED` in
+  `@utils/constants` carries `id`: a read applies its projection in the query and is handed `id`
+  regardless, so leaving it out of write responses would make it the one field that appears when an
+  entity is read and vanishes when the same entity is written.
+- **An unpopulated virtual is simply absent** from the JSON, so adding one changes no existing
+  response. Only an endpoint that populates it pays for it.
+- **Never put `match` on the virtual itself.** A `match` there applies to every caller, including a
+  future screen that has to show a deactivated child. Narrow it in the populate spec instead, which
+  is the response config's job — `controller-structure` §11.
+- **A virtual is not a column,** so it does not go in a `select` string. Naming it would ask the
+  database for a field that does not exist. A real `ref` field is the opposite: it must be in
+  `select`, or mongoose has no id to follow.
+- The virtual's name is the plural of what it holds — `addresses`, `contacts` — and the header above
+  it says why the list is read rather than stored.
 
 ---
 
@@ -651,6 +720,7 @@ Before reporting a model change complete, verify:
 - [ ] On a removal: every limit, message, enum, pattern, helper, `ref` and index entry that existed only for the removed model or field is gone, and every barrel `index.js` was unregistered. A grep for the removed identifiers across `src/` returns nothing.
 - [ ] Imports go through `@enums`, `@validators/constants`, `@validators/messages`, `@helpers/<feature>` — no relative paths, no per-file imports outside the documented exceptions.
 - [ ] `is_active`, `timestamps` mapping, `versionKey: false`, `toJSON` / `toObject` `flattenMaps` all present.
+- [ ] A model with children declares a populate virtual rather than storing an array of them, carries `virtuals: true` on both serialisers, and puts no `match` on the virtual.
 - [ ] Single-field indexes inline; compound and text indexes at the bottom via `schema.index(...)`; uniqueness scoping and soft-delete interaction decided deliberately.
 - [ ] All of these load without error. The first three are the cycle check — a model, the helper and
       the app must each be safe as the *first* thing loaded, because a require cycle only bites on

@@ -508,11 +508,17 @@ Helpers are imported by direct path and have **no barrel `index.js`**, unlike `@
 `@validators/messages`. Do not add one — lazy model requires inside helpers exist to avoid circular
 imports, and a barrel reintroduces them.
 
-**Utils.** `src/utils/` does not exist yet. The first controller that needs it must, in the same
-change, add `"@utils": "src/utils"` to `_moduleAliases` in `package.json` **and**
-`"@utils/*": ["./src/utils/*"]` to `paths` in `jsconfig.json`. Missing the first gives
-`Cannot find module "@utils/…"` at runtime; missing the second only breaks editor navigation, which
-is worse because it looks fine.
+**Utils.** `src/utils/` holds `projection/`, `financial_year/`, `constants/` and the flat
+`reference_error.js`, and both aliases are already registered — `"@utils": "src/utils"` in
+`package.json` `_moduleAliases` and `"@utils/*": ["./src/utils/*"]` in `jsconfig.json` `paths`. If
+you ever add a new top-level folder of your own, register it in **both**: missing the first gives
+`Cannot find module "@…"` at runtime; missing the second only breaks editor navigation, which is
+worse because it looks fine.
+
+A util with more than one exported function gets a folder holding `index.js` and one file per
+function; a single standalone function stays a flat file, as `reference_error.js` does. Import the
+one you want — `require("@utils/projection")` — never the `@utils` barrel, which would load every
+util, moment and lodash included, on every request.
 
 Utils never talk to the database. The boundary in the awkward middle:
 
@@ -703,10 +709,40 @@ must echo the deactivated row, it uses `project(...)` with the same config as `u
 
 ### Virtuals
 
-`company_model` and `company_address_model` serialise with `virtuals: true`. A virtual computed from
-columns the projection dropped silently produces `undefined` rather than an error. When a feature has
-virtuals, its `select` must include every column those virtuals read, and the config should say so
-in a comment.
+`company_model` and `company_address_model` serialise with `virtuals: true` — the first for its
+`addresses`, the second for its `contacts`. `model-structure` owns how one is declared; this section
+owns how a response config expands one.
+
+A **computed** virtual reads other columns, and one whose columns the projection dropped silently
+produces `undefined` rather than an error. When a feature has computed virtuals, its `select` must
+include every column they read, and the config should say so in a comment.
+
+A **populate** virtual is the opposite: it is not a column, so it must *not* go in `select`. Naming
+it would ask the database for a field that does not exist. A real `ref` field must be in `select`,
+because mongoose needs the stored id to follow — `company_contact_response.list` selects `company`
+and `company_address` for exactly that reason, even though what a reader wants is the documents
+behind them.
+
+Narrow a populated child list in the populate spec, never on the virtual:
+
+```js
+{
+  path: "addresses",
+  select: COMPANY_ADDRESS_SELECT,
+  match: { is_active: true },
+  populate: { path: "contacts", select: COMPANY_CONTACT_SELECT, match: { is_active: true } },
+}
+```
+
+**`match` behaves differently on a list and on a single reference.** On a child list it drops the
+rows that do not match, which is what hides deactivated children. On a **to-one** reference it does
+not drop anything — it replaces the document with `null`, so a contact under a deactivated company
+would arrive claiming to belong to nobody. Leave `match` off a to-one parent and let its own
+`is_active` say what state it is in, as `company_contact_response.list` does.
+
+Which children a row shows is a product decision worth recording in the config's header. The company
+list shows **all** of a company's active children, never only those a filter matched: a search
+decides which companies appear, not what each of them contains.
 
 ### Aggregations
 
@@ -784,7 +820,8 @@ Before reporting a controller change complete, verify:
 - [ ] List uses `build_list_query` + `build_pagination`, awaits `apply_reference_filters` if and only if the config declares `reference_filters`, and returns `{ <resource>s, summary?, sort, pagination }`.
 - [ ] No `startSession` / `withTransaction` in the controller.
 - [ ] No inline `select` string and no inline populate spec. Both come from `get_response_shape(<feature>_response, "<action>")` in `src/helpers/<feature>/constants/<feature>_response.js`, imported through `@helpers/<feature>`.
-- [ ] `select` is inclusion-only (no `-field`), lists every column the client needs to display *and* act on, and includes any path that is also populated.
+- [ ] `select` is inclusion-only (no `-field`), lists every column the client needs to display *and* act on, and includes any real `ref` path that is also populated — but never a populate virtual, which is not a column.
+- [ ] `match: { is_active: true }` narrows populated child *lists* only; no to-one parent carries a `match`, which would null the document rather than drop the row.
 - [ ] Every populate entry has an explicit `select`; a repeated reference shape goes through the owning feature's response config rather than a fresh literal.
 - [ ] Read actions apply the projection in the query; write actions populate the in-memory document and pass it through `project(document, select)` — no extra round trip, no projection on the document that `save()` writes back.
 - [ ] Nothing sensitive relies on the response config to stay hidden; it is `select: false` on the schema.

@@ -127,14 +127,19 @@ src/
   server.js            loads settings, connects the database, starts listening
   config/database.js   the database connection
   controllers/auth/    signing in, and all three signups
-  enums/               user_type, http_status, manageable_user_types
-  helpers/             auth/, common/, list_query/ — each split into
-                       constants | db | utils
+  controllers/company/ the company, address and contact endpoints
+  enums/               user_type, http_status, manageable_user_types,
+                       company_type, contact_position
+  helpers/             auth/, common/, company/, list_query/ — each split
+                       into constants | db | utils
   middlewares/         app_error, async_handler, authenticate_user,
                        error_handler, not_found_handler, validate_request
   models/user/         the user model, behind its own index
+  models/company/      the company, address and contact models, behind one
+                       index
   public/              images, styles, and the 404 page
-  routes/              super_admin/, admin/, employee/ — each with auth/
+  routes/              super_admin/, admin/, employee/ — each with auth/;
+                       admin/ also has company/
   utils/               projection/, financial_year/, constants/
   validators/          constants/, messages/, request_body/,
                        query_params/, route_params/
@@ -149,7 +154,17 @@ docs/
 
 ## 4. How data is stored
 
-Version 1 has one collection: `users`.
+Version 1 has four collections: `users`, `companies`, `companyaddresses` and
+`companycontacts`.
+
+The three company collections are one tree. A company is a firm we buy from, sell
+to, or both. An address is a place it trades from, and a contact is a person at
+one of those addresses. A child knows its parent; a parent keeps no list, and
+reads the children back through a populate virtual.
+
+Deletes are soft everywhere, and they cascade downwards only: deleting a company
+deactivates its addresses and contacts, deleting an address deactivates the
+contacts at it, and deleting a contact deactivates nobody else.
 
 ### 4.1 The user record
 
@@ -216,6 +231,95 @@ running number. Example: `2609001` is the first account made in September 2026.
   happen.
 - After 999 accounts in one month, the system stops and says the numbers for
   this month are used up. It does not fail with a general error.
+
+### 4.5 The company record
+
+| Field | Type | Rules | Index |
+| ----- | ---- | ----- | ----- |
+| `company_name` | Text | needed, spaces trimmed, 2–150 characters | yes |
+| `company_type` | Text | needed, one of `supplier`, `customer`, `both` | yes |
+| `email` | Text | needed, trimmed, made lowercase, 5–254, must look like an email | yes |
+| `phone_number` | Text | needed, trimmed, exactly 10 digits | yes |
+| `gst_number` | Text | needed, trimmed, made uppercase, exactly 15, a valid GSTIN | unique |
+| `pan_number` | Text | needed, trimmed, made uppercase, exactly 10 | unique |
+| `is_active` | Yes/No | `true` by default | yes |
+| `created_by` | Link to a user | needed | — |
+| `updated_by` | Link to a user | empty until someone edits the row | — |
+| `created_at`, `updated_at` | Date | set by the system | — |
+
+`gst_number` and `pan_number` identify the firm, so they are the unique ones.
+`company_name` is not unique: two traders really can share a name. Email and
+phone number are not unique either, because every branch of a firm often shares
+one head office number.
+
+A deleted company keeps its GST and PAN reserved, because the deletion is a soft
+one and the numbers still belong to a real firm.
+
+### 4.6 The company address record
+
+| Field | Type | Rules | Index |
+| ----- | ---- | ----- | ----- |
+| `company` | Link to a company | needed | yes |
+| `address` | Text | needed, trimmed, 3–500 characters | — |
+| `pincode` | Text | needed, trimmed, 6 digits, cannot start with zero | — |
+| `is_active` | Yes/No | `true` by default | yes |
+| `created_by` | Link to a user | needed | — |
+| `updated_by` | Link to a user | empty until someone edits the row | — |
+| `created_at`, `updated_at` | Date | set by the system | — |
+
+The whole postal address is one block of text rather than a line each. The PIN
+code is stored as text, not a number: it is an identifier that happens to be
+spelled in digits, and storing it as a number would invite a leading zero to be
+dropped.
+
+### 4.7 The company contact record
+
+| Field | Type | Rules | Index |
+| ----- | ---- | ----- | ----- |
+| `company` | Link to a company | needed | yes |
+| `company_address` | Link to an address | needed | yes |
+| `name` | Text | needed, trimmed, 2–100 characters | — |
+| `phone_number` | Text | needed, trimmed, exactly 10 digits | yes |
+| `position` | Text | needed, one of `owner`, `manager`, `accounts`, `purchase`, `sales`, `other` | yes |
+| `is_active` | Yes/No | `true` by default | yes |
+| `created_by` | Link to a user | needed | — |
+| `updated_by` | Link to a user | empty until someone edits the row | — |
+| `created_at`, `updated_at` | Date | set by the system | — |
+
+A contact stores both the company and the address. Keeping both means a
+company's people can be listed without loading every address it has. The cost is
+that the two can disagree — an address that is real but belongs to a different
+company — so the endpoint that writes a contact checks the pair before saving.
+
+`position` is what the person is to us, not their printed job title. It is short
+on purpose: it exists so a purchase call reaches the purchase desk.
+
+### 4.8 How the three fit together
+
+A child knows its parent. A company keeps no list of its addresses, and an
+address keeps no list of its contacts. A stored list would be a second copy of
+the same fact, and the two would drift the first time a child was written
+without the parent being updated.
+
+The lists are read back through populate virtuals: `addresses` on a company and
+`contacts` on an address. Nothing is fetched until an endpoint asks, so a reply
+that does not populate them simply does not carry them.
+
+Whether a link points at a row that exists and is still active is checked by the
+endpoint before it writes, never by the record itself. A record that checked its
+own links would have to import the code that reads the database, and that code
+already imports the record — a circle Node answers with a half-built module.
+
+Deletes are soft and cascade downwards only:
+
+| Deleting | Also deactivates |
+| -------- | ---------------- |
+| a company | all its addresses and all its contacts |
+| an address | the contacts at that address |
+| a contact | nothing |
+
+Each cascade runs in one transaction, so a tree cannot be half deleted. Nothing
+reverses a delete today.
 
 ---
 

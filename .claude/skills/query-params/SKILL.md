@@ -200,7 +200,8 @@ Rules:
 | `search_fields` | `string[]` | `?search=ram` | `{ $or: [...] }` | OR, applied last |
 | `exact_filters` | `{ column: joiSchema }` | `?user_type=employee` | `{ user_type: "employee" }` | AND, replaces base scope for that column |
 | `derived_filters` | `{ param: { schema, to_filter } }` | `?in_stock=true` | whatever `to_filter` returns | AND |
-| `reference_filters` | `{ param: { schema, to_filter } }` | `?agency=cg` | resolved against another collection | AND, async |
+| `reference_filters` | `{ param: { schema, to_filter } }` | `?agency=cg` | resolved against another collection, collected under `$and` | AND, async |
+| `reference_search` | `{ name: to_branch }` | `?search=ram` | one `$or` branch per entry, each resolved against another collection | OR, async |
 | `date_filters` | `string[]` of `<x>_at` | `?created_from=…&created_to=…` | `{ created_at: { $gte, $lte } }` | AND |
 | `sort_fields` | `string[]` | `?sort=first_name:asc` | `{ first_name: 1, _id: -1 }` | — |
 | `text_sort_fields` | `string[]` ⊆ `sort_fields` | — | adds English collation to the find options | — |
@@ -289,8 +290,49 @@ These are applied by `apply_reference_filters` in the controller, **not** inside
 declares `reference_filters` therefore requires its controller to await that call; say so in the
 config's header comment, because nothing else will remind whoever adds one.
 
+**Several of them combine under `$and`, not by assignment.** A lookup usually answers with the ids
+it found, so two reference filters on one resource both produce `{ _id: { $in: [...] } }`. Merging
+those by assignment would keep the last and silently drop the rest — `?pincode=4110&contact_name=ram`
+would apply only one of the two, with no error to notice. `apply_reference_filters` therefore
+appends every condition to the filter's `$and` array, whatever key each one happens to use, and
+extends an existing `$and` rather than replacing it.
+
+Two consequences worth knowing. A single reference filter is still wrapped in `$and`, which is
+equivalent and keeps one code path. And a `to_filter` is free to answer on `_id` — it does not have
+to invent a unique key to avoid a collision.
+
 The lookup belongs in `src/helpers/common/db/` (or the feature's own `db/` folder if
 only this resource needs it) — never inline in the config.
+
+### reference_search
+
+The single search box reaching a column the resource does not store — a contact's name when the row
+being listed is a company. Where a `reference_filter` narrows, this widens: each entry adds one
+branch to the search `$or`, so one term typed once can match the resource's own columns or a joined
+one.
+
+The shape is simpler than a reference filter's, because there is no parameter of its own to
+validate. The key is a name for the branch and the value is the async function that builds it:
+
+```js
+reference_search: {
+  address: async (value) => ({
+    _id: { $in: await find_company_ids_by_address_search(value) },
+  }),
+},
+```
+
+It reads `query.search`, so nothing is looked up when the box is empty. The branches are appended to
+the `$or` that `build_search_filter` already produced, rather than replacing it, so the box spans the
+resource's own columns and the joined ones together. A resource with an empty `search_fields` has no
+`$or` yet and gets one made of these branches alone.
+
+Group the columns rather than the collections' worth of them: one entry that asks a child collection
+about three of its columns in a single query beats three entries asking it three times, because the
+box does not know which column the caller meant.
+
+Like `reference_filters`, these are applied by `apply_reference_filters` in the controller, so a
+config that declares either one requires its controller to await that call.
 
 ### date_filters
 
@@ -377,7 +419,7 @@ Six files, every time. A config that is not registered is a schema that never ru
 ```js
 const {
   build_list_query_schema,
-} = require("@validators/query_params/list_query_schema");
+} = require("@validators/query_params/factory");
 const {
   list_<feature>_config,
 } = require("@validators/query_params/<feature>/list_<feature>_config");
@@ -416,7 +458,9 @@ const { filter, sort, applied_sort, options, page, limit, skip } =
 Search and filter arrive merged into one `filter`. `options` carries collation when a text column is
 being sorted. The controller reads `req.validated_query`, never `req.query`.
 
-Only a config with `reference_filters` makes its controller await `apply_reference_filters`.
+Only a config with `reference_filters` or `reference_search` makes its controller await
+`apply_reference_filters`. That call returns the filter to query with: the narrowing conditions
+under `$and`, the widening branches appended to `$or`.
 
 ---
 
@@ -530,8 +574,10 @@ range_filters: ["purchase_price", "sale_price"],
 
 Adding one takes four coordinated edits, and all four are required or the two halves drift:
 
-1. `list_query_schema.js` — generate the parameter schemas from the new key, with the cross-field
-   check (`min` must not exceed `max`, as the date ranges already do).
+1. `src/validators/query_params/factory/` — a new builder file beside the others, generating the
+   parameter schemas from the new key, plus a line spreading it into `build_list_query_schema` in
+   that folder's `index.js`. Cross-field checks (`min` must not exceed `max`, as the date ranges
+   already do) go on the assembled schema, as `build_date_range_validator` does.
 2. `@helpers/list_query/utils/build_filter.js` — the loop that turns validated values into conditions.
 3. The shared builder's config-shape comment in `@helpers/list_query/utils/build_list_query.js`.
 4. This skill's §4 table.
@@ -553,7 +599,8 @@ once, and there is currently no test suite to catch a regression.
 - [ ] Every `text_sort_fields` entry also appears in `sort_fields`; dates, enums, booleans and numbers are not in `text_sort_fields`.
 - [ ] `exact_filters` entries carry a real Joi schema (`valid(...)` for enums), not a bare `joi.string()`.
 - [ ] `derived_filters.to_filter` is synchronous and queries nothing; anything that queries is a `reference_filter`.
-- [ ] A config with `reference_filters` says so in its header, because its controller must await `apply_reference_filters`.
+- [ ] A config with `reference_filters` or `reference_search` says so in its header, because its controller must await `apply_reference_filters`.
+- [ ] A `reference_search` entry is a bare async function of the search term, not a `{ schema, to_filter }` pair; it has no parameter of its own to validate.
 - [ ] Lookup functions live in a helper, never inline in the config.
 - [ ] `base_filter` is a security or tenancy boundary, and no column it scopes is also exposed as an `exact_filter` unless overriding it is intended.
 - [ ] No pagination keys in the config — `page` and `limit` come from `pagination_defaults`.
