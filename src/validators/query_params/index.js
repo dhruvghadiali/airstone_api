@@ -9,5 +9,11 @@
 const {
   list_companies_query_schema,
 } = require("@validators/query_params/company");
+const {
+  list_company_contacts_query_schema,
+} = require("@validators/query_params/company_contact");
 
-module.exports = { list_companies_query_schema };
+module.exports = {
+  list_companies_query_schema,
+  list_company_contacts_query_schema,
+};

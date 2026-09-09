@@ -134,13 +134,60 @@ const company_address_response = Object.freeze({
 });
 
 /**
+ * The same contact columns plus the two ids that say where the person sits.
+ *
+ * A populate path has to be in the projection or mongoose has no reference to
+ * follow, so the contact list selects `company` and `company_address` even
+ * though what a reader wants is the documents behind them.
+ *
+ * @type {string}
+ */
+const COMPANY_CONTACT_LIST_SELECT = [
+  COMPANY_CONTACT_SELECT,
+  "company",
+  "company_address",
+].join(" ");
+
+/**
+ * How the contact list expands the branch a person works at and the firm that
+ * owns it.
+ *
+ * Both are real reference fields on the contact rather than virtuals: a contact
+ * stores its company as well as its address, so the firm is one lookup rather
+ * than a hop through the address. They are returned side by side for the same
+ * reason -- nesting the company under the address would suggest the contact
+ * reached it that way.
+ *
+ * Neither carries a `match`. A `match` on a to-one reference does not hide the
+ * row, it replaces the document with null, so a contact under a deactivated
+ * company would arrive claiming to belong to nobody. Both selects include
+ * `is_active`, which says the same thing honestly.
+ */
+const COMPANY_CONTACT_PARENTS_POPULATE = Object.freeze([
+  Object.freeze({ path: "company", select: COMPANY_SELECT }),
+  Object.freeze({ path: "company_address", select: COMPANY_ADDRESS_SELECT }),
+]);
+
+/**
  * The shape every company contact response is built from. A third entity, so a
  * third config, for the reason given above.
+ *
+ * `default` is the bare contact, and it is what update and delete answer with.
+ * A contact returned inside a company already sits under the address it belongs
+ * to, so repeating either id there would say what the nesting already says.
+ *
+ * `list` is that plus the branch and the firm, because a table of contacts is
+ * read across companies -- a row saying only "Ramesh, purchase" is of no use
+ * without the firm beside it.
  */
 const company_contact_response = Object.freeze({
   default: Object.freeze({
     select: COMPANY_CONTACT_SELECT,
     populate: Object.freeze([]),
+  }),
+  list: Object.freeze({
+    select: COMPANY_CONTACT_LIST_SELECT,
+    populate: COMPANY_CONTACT_PARENTS_POPULATE,
   }),
 });
 
@@ -151,4 +198,5 @@ module.exports = {
   COMPANY_SELECT,
   COMPANY_ADDRESS_SELECT,
   COMPANY_CONTACT_SELECT,
+  COMPANY_CONTACT_LIST_SELECT,
 };

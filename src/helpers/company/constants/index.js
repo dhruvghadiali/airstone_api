@@ -11,6 +11,7 @@ const {
   COMPANY_SELECT,
   COMPANY_ADDRESS_SELECT,
   COMPANY_CONTACT_SELECT,
+  COMPANY_CONTACT_LIST_SELECT,
 } = require("@helpers/company/constants/company_response");
 
 module.exports = {
@@ -20,4 +21,5 @@ module.exports = {
   COMPANY_SELECT,
   COMPANY_ADDRESS_SELECT,
   COMPANY_CONTACT_SELECT,
+  COMPANY_CONTACT_LIST_SELECT,
 };

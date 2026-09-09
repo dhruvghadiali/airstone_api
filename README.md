@@ -82,6 +82,8 @@ Send the returned JWT with every authenticated request as
 ### Companies
 
 - `GET /admin/companies` — list companies, paged. Admin only
+- `GET /admin/companies/contacts` — list contacts across every company, paged.
+  Admin only
 - `POST /admin/companies` — create a company with its addresses and their
   contacts. Admin only
 - `PATCH /admin/companies/:id` — change a company's own details. Admin only
@@ -120,6 +122,20 @@ ids before the list query could run, and that has not been asked for.
 
 `is_active` defaults to true, so deactivated companies need `?is_active=false`.
 Each row carries all of that company's active addresses and contacts.
+
+The contact list accepts `page`, `limit`, `search`, `sort` (or `sort_by` +
+`sort_order`), the column filters `name` and `phone_number`, the exact filters
+`position` and `is_active`, and the date range `created_from` / `created_to`.
+`search` spans `name`, `phone_number` and `position`.
+
+Every row carries the address the person works at under `company_address` and
+the firm under `company`, but neither is filterable, searchable or sortable —
+they are a projection, not part of the query. A company's own people are already
+reachable through the company list, which returns them nested.
+
+Neither parent is hidden when deactivated. A `match` on a to-one reference
+replaces the document with null rather than dropping the row, so both are
+returned with their own `is_active` instead.
 
 `is_active`, `created_by` and `updated_by` are set by the server and are
 rejected if sent. The three collections are written in one transaction, so the
