@@ -20,6 +20,7 @@ const {
 const {
   create_company_schema,
   update_company_schema,
+  update_company_contact_schema,
   update_company_address_schema,
 } = require("@validators/request_body/company");
 
@@ -32,5 +33,6 @@ module.exports = {
   super_admin_signup_schema,
   create_company_schema,
   update_company_schema,
+  update_company_contact_schema,
   update_company_address_schema,
 };

@@ -85,6 +85,7 @@ Send the returned JWT with every authenticated request as
   contacts. Admin only
 - `PATCH /admin/companies/:id` — change a company's own details. Admin only
 - `PATCH /admin/companies/addresses/:id` — change one address. Admin only
+- `PATCH /admin/companies/contacts/:id` — change one contact. Admin only
 
 The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 `gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
@@ -109,8 +110,18 @@ The address update body accepts `address` and `pincode`, both optional, and
 needs at least one of them. It does not accept `company`: an address cannot be
 moved to another company, because the contacts filed under it would then name a
 company that no longer owns the place they work at. It does not accept
-`contact_person` either — a contact is a row with an id of its own, and contact
-endpoints do not exist yet. The reply is the address alone.
+`contact_person` either — a contact is a row with an id of its own. The reply is
+the address alone.
+
+The contact update body accepts `name`, `phone_number` and `position`, all
+optional, and needs at least one of them. It does not accept `company` or
+`company_address`: a contact cannot be moved to another branch, because an
+address already knows its company and accepting one id without the other would
+leave the pair disagreeing. The reply is the contact alone.
+
+Each update endpoint changes one collection and its own columns only. None of
+them accepts the ids that tie the three together, so an update can never move a
+row to a new parent and leave its children pointing at the old one.
 
 ## Migrations
 

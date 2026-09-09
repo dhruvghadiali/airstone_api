@@ -8,6 +8,7 @@ const {
 
 const create_company_route = require("@routes/admin/company/create_company_route");
 const update_company_route = require("@routes/admin/company/update_company_route");
+const update_company_contact_route = require("@routes/admin/company/update_company_contact_route");
 const update_company_address_route = require("@routes/admin/company/update_company_address_route");
 
 const router = express.Router();
@@ -23,20 +24,23 @@ const router = express.Router();
  * is day to day work, and the super admin router is for the things only it can
  * do -- creating admins, and bootstrapping itself.
  *
- * Create, update, and update one address exist today. There is no get, list or
+ * Create, and one update per collection, exist today. There is no get, list or
  * delete route yet, by design rather than by oversight: the endpoints have not
  * been asked for.
  *
- * Each update touches one collection. `PATCH /:id` changes the company's own
- * columns and `PATCH /addresses/:id` changes one address, so neither can reach
- * across into rows the caller did not name. Contacts have no endpoint yet.
+ * Each update touches one collection and edits that row's own columns only.
+ * `PATCH /:id` changes the company, `PATCH /addresses/:id` changes one address,
+ * `PATCH /contacts/:id` changes one contact. None of them accepts the ids that
+ * tie the three together, so no update can move a row from one parent to
+ * another and leave its children pointing at the old one.
  *
- * `/addresses/:id` is mounted before `/:id`. Express would not confuse the two
- * -- `/:id` matches a single segment -- but mounting the more specific path
- * first is the project's rule and costs nothing.
+ * `/addresses/:id` and `/contacts/:id` are mounted before `/:id`. Express would
+ * not confuse them -- `/:id` matches a single segment -- but mounting the more
+ * specific paths first is the project's rule and costs nothing.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
 router.use(create_company_route);
+router.use(update_company_contact_route);
 router.use(update_company_address_route);
 router.use(update_company_route);
 

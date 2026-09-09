@@ -22,6 +22,10 @@ const contact_positions = Object.values(contact_position).join(", ");
  * so the controller checks it after `find_active_company_address` hands back the
  * address and the company that owns it.
  *
+ * `UPDATE_MIN` is what an empty PATCH body is answered with. A request that
+ * names no field is a call that would do nothing, and telling the caller so
+ * beats a 200 that changed nothing.
+ *
  * `PHONE_NUMBER_*` interpolate `user_validation_limits`, because a contact's
  * phone number is the same ten digit number a user's is. See the header of
  * `company_contact_constants.js`.
@@ -33,11 +37,13 @@ const company_contact_messages = Object.freeze({
   UPDATED: "Company contact updated successfully",
   DELETED: "Company contact deleted successfully",
   NOT_FOUND: "Company contact not found",
+  INVALID_ID: "Invalid company contact id",
   ADDRESS_NOT_OWNED:
     "The selected address does not belong to the selected company",
 });
 
 const company_contact_validation_messages = Object.freeze({
+  UPDATE_MIN: "At least one field must be sent to update a contact",
   COMPANY_REQUIRED: "Company is required",
   COMPANY_BASE: "Company must be a string",
   COMPANY_EMPTY: "Company cannot be empty",

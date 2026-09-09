@@ -7,10 +7,12 @@
  */
 const create_company_schema = require("@validators/request_body/company/create_company_validator");
 const update_company_schema = require("@validators/request_body/company/update_company_validator");
+const update_company_contact_schema = require("@validators/request_body/company/update_company_contact_validator");
 const update_company_address_schema = require("@validators/request_body/company/update_company_address_validator");
 
 module.exports = {
   create_company_schema,
   update_company_schema,
+  update_company_contact_schema,
   update_company_address_schema,
 };
