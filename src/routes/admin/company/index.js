@@ -7,6 +7,7 @@ const {
 } = require("@middlewares/authenticate_user");
 
 const create_company_route = require("@routes/admin/company/create_company_route");
+const delete_company_route = require("@routes/admin/company/delete_company_route");
 const update_company_route = require("@routes/admin/company/update_company_route");
 const update_company_contact_route = require("@routes/admin/company/update_company_contact_route");
 const update_company_address_route = require("@routes/admin/company/update_company_address_route");
@@ -24,9 +25,13 @@ const router = express.Router();
  * is day to day work, and the super admin router is for the things only it can
  * do -- creating admins, and bootstrapping itself.
  *
- * Create, and one update per collection, exist today. There is no get, list or
- * delete route yet, by design rather than by oversight: the endpoints have not
+ * Create, one update per collection, and delete exist today. There is no get or
+ * list route yet, by design rather than by oversight: the endpoints have not
  * been asked for.
+ *
+ * Delete is a soft delete and it cascades: deactivating a company deactivates
+ * its addresses and its contacts in the same transaction. There is no route that
+ * reverses it.
  *
  * Each update touches one collection and edits that row's own columns only.
  * `PATCH /:id` changes the company, `PATCH /addresses/:id` changes one address,
@@ -43,5 +48,6 @@ router.use(create_company_route);
 router.use(update_company_contact_route);
 router.use(update_company_address_route);
 router.use(update_company_route);
+router.use(delete_company_route);
 
 module.exports = router;

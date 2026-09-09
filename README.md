@@ -86,6 +86,8 @@ Send the returned JWT with every authenticated request as
 - `PATCH /admin/companies/:id` — change a company's own details. Admin only
 - `PATCH /admin/companies/addresses/:id` — change one address. Admin only
 - `PATCH /admin/companies/contacts/:id` — change one contact. Admin only
+- `DELETE /admin/companies/:id` — deactivate a company and everything under it.
+  Admin only
 
 The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 `gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
@@ -122,6 +124,14 @@ leave the pair disagreeing. The reply is the contact alone.
 Each update endpoint changes one collection and its own columns only. None of
 them accepts the ids that tie the three together, so an update can never move a
 row to a new parent and leave its children pointing at the old one.
+
+Delete is a soft delete: it sets `is_active` to false on the company, on every
+one of its addresses and on every one of its contacts, in one transaction. It
+takes no body. A company that is already deactivated answers 404, so a repeat
+call cannot overwrite the `updated_by` of the deletion that came first.
+
+Nothing reverses a delete. There is no restore route, and no update endpoint
+accepts `is_active`, so bringing a company back is a database job today.
 
 ## Migrations
 
