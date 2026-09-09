@@ -1,3 +1,4 @@
+const list_companies = require("@controllers/company/list_companies");
 const create_company = require("@controllers/company/create_company");
 const delete_company = require("@controllers/company/delete_company");
 const update_company = require("@controllers/company/update_company");
@@ -7,6 +8,7 @@ const update_company_contact = require("@controllers/company/update_company_cont
 const update_company_address = require("@controllers/company/update_company_address");
 
 module.exports = {
+  list_companies,
   create_company,
   delete_company,
   update_company,

@@ -88,10 +88,26 @@ const company_address_schema = new mongoose.Schema(
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
     versionKey: false,
-    toJSON: { flattenMaps: true },
-    toObject: { flattenMaps: true },
+    toJSON: { flattenMaps: true, virtuals: true },
+    toObject: { flattenMaps: true, virtuals: true },
   },
 );
+
+/**
+ * The people who work at this address, read rather than stored.
+ *
+ * Declared for the same reason `addresses` is on the company, and narrowed to
+ * active contacts by the endpoint that populates it rather than here.
+ *
+ * A contact stores both `company` and `company_address`. This joins on the
+ * address, so populating a company's addresses and then their contacts gives
+ * each branch its own people rather than the whole firm's.
+ */
+company_address_schema.virtual("contacts", {
+  ref: "CompanyContact",
+  localField: "_id",
+  foreignField: "company_address",
+});
 
 // Addresses are read one company at a time, and always the active ones, so the
 // compound key leads with the company.

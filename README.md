@@ -81,6 +81,7 @@ Send the returned JWT with every authenticated request as
 
 ### Companies
 
+- `GET /admin/companies` — list companies, paged. Admin only
 - `POST /admin/companies` — create a company with its addresses and their
   contacts. Admin only
 - `PATCH /admin/companies/:id` — change a company's own details. Admin only
@@ -101,6 +102,24 @@ The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 one entry; each contact accepts `name`, `phone_number` and `position`.
 `position` is one of `owner`, `manager`, `accounts`, `purchase`, `sales` or
 `other`.
+
+Each row carries the company's active addresses under `addresses`, and each
+address's active contacts under `contacts`.
+
+The list accepts `page`, `limit`, `search`, `sort` (or `sort_by` +
+`sort_order`), the column filters `company_name`, `email`, `phone_number`,
+`gst_number` and `pan_number`, the exact filters `company_type` and `is_active`,
+and the date range `created_from` / `created_to`. Anything else is a 400 — the
+contract is `src/validators/query_params/company/`.
+
+`search`, the filters and the sort all work on the company's own columns only.
+The addresses and contacts are a projection, not part of the query: they are
+returned with every row, but `?pincode=411001` and `?sort=contact_name:asc` are
+both 400s. Reaching a child column would mean resolving it to a set of company
+ids before the list query could run, and that has not been asked for.
+
+`is_active` defaults to true, so deactivated companies need `?is_active=false`.
+Each row carries all of that company's active addresses and contacts.
 
 `is_active`, `created_by` and `updated_by` are set by the server and are
 rejected if sent. The three collections are written in one transaction, so the

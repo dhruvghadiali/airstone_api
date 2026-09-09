@@ -10,10 +10,19 @@
  *
  * Two config keys land here, and they differ in how they combine rather than in
  * what they read. `reference_filters` are per column and narrow: each is its own
- * condition, merged by assignment, so naming a supplier and a product asks for
- * rows matching both. `reference_search` is the single box and widens: each
- * entry adds one branch to the search `$or`, so one term typed once can match a
- * supplier's name or a product's.
+ * condition, and all of them have to hold. `reference_search` is the single box
+ * and widens: each entry adds one branch to the search `$or`, so one term typed
+ * once can match a supplier's name or a product's.
+ *
+ * The narrowing conditions go into `$and` rather than being assigned onto the
+ * filter. Assignment looks equivalent and is not: a lookup answers with the ids
+ * it found, so two of them both produce `{ _id: { $in: [...] } }` and the second
+ * silently replaces the first. Filtering by PIN code and by contact name would
+ * quietly apply only one of the two. `$and` keeps every condition, whatever key
+ * each one happens to use.
+ *
+ * An existing `$and` on the filter is extended rather than replaced, so a
+ * resource that grows another source of `$and` clauses does not lose these.
  *
  * Every lookup runs together rather than one after another, since they are
  * independent. Running them in turn would cost a round trip each before the list
@@ -22,8 +31,9 @@
  * @param   {Object} filter       The filter `build_filter` produced.
  * @param   {Object} [query={}]   The validated query string.
  * @param   {Object} [config={}]  The resource's list config.
- * @returns {Promise<Object>} The filter with the looked up clauses merged in.
- *                            The original is left untouched.
+ * @returns {Promise<Object>} The filter with the looked up clauses merged in --
+ *                            the narrowing ones under `$and`, the widening ones
+ *                            appended to `$or`. The original is left untouched.
  */
 const apply_reference_filters = async (filter, query = {}, config = {}) => {
   const entries = Object.entries(config.reference_filters || {}).filter(
@@ -45,7 +55,11 @@ const apply_reference_filters = async (filter, query = {}, config = {}) => {
     Promise.all(searched.map((to_branch) => to_branch(query.search))),
   ]);
 
-  const applied = Object.assign({ ...filter }, ...conditions);
+  const applied = { ...filter };
+
+  if (conditions.length) {
+    applied.$and = [...(applied.$and || []), ...conditions];
+  }
 
   if (!branches.length) {
     return applied;

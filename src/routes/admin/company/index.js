@@ -6,6 +6,7 @@ const {
   authorize_user_types,
 } = require("@middlewares/authenticate_user");
 
+const list_companies_route = require("@routes/admin/company/list_companies_route");
 const create_company_route = require("@routes/admin/company/create_company_route");
 const delete_company_route = require("@routes/admin/company/delete_company_route");
 const delete_company_contact_route = require("@routes/admin/company/delete_company_contact_route");
@@ -27,9 +28,10 @@ const router = express.Router();
  * is day to day work, and the super admin router is for the things only it can
  * do -- creating admins, and bootstrapping itself.
  *
- * Create, one update per collection, and delete exist today. There is no get or
- * list route yet, by design rather than by oversight: the endpoints have not
- * been asked for.
+ * List, create, one update per collection, and delete exist today. There is no
+ * get route for a single company yet, by design rather than by oversight: it has
+ * not been asked for. The list answers with company columns only, so the tree of
+ * addresses and contacts has nowhere to be read from except the create reply.
  *
  * Every delete is a soft delete and each cascades downwards only. Deleting a
  * company deactivates its addresses and its contacts; deleting one address
@@ -49,6 +51,7 @@ const router = express.Router();
  * specific paths first is the project's rule and costs nothing.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
+router.use(list_companies_route);
 router.use(create_company_route);
 router.use(update_company_contact_route);
 router.use(update_company_address_route);

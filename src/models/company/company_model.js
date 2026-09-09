@@ -162,10 +162,32 @@ const company_schema = new mongoose.Schema(
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
     versionKey: false,
-    toJSON: { flattenMaps: true },
-    toObject: { flattenMaps: true },
+    toJSON: { flattenMaps: true, virtuals: true },
+    toObject: { flattenMaps: true, virtuals: true },
   },
 );
+
+/**
+ * The company's addresses, read rather than stored.
+ *
+ * An address knows which company it belongs to; the company does not keep a list
+ * of them. A stored array would be a second copy of that fact, and the two would
+ * drift the first time an address was written without the company being updated.
+ *
+ * Nothing is fetched until an endpoint asks: an unpopulated virtual is simply
+ * absent from the response, so the create and update replies are unchanged. The
+ * list endpoint populates it, and narrows it to active addresses there rather
+ * than here -- a `match` on the virtual would apply to every caller, including a
+ * future screen that has to show a closed branch.
+ *
+ * `virtuals: true` on the two serialisers above is what puts this in the JSON,
+ * and it also adds mongoose's own `id` string beside `_id`.
+ */
+company_schema.virtual("addresses", {
+  ref: "CompanyAddress",
+  localField: "_id",
+  foreignField: "company",
+});
 
 // The company list is searched by name and filtered by type and active state,
 // so the compound key leads with the type. GST and PAN are looked up whole

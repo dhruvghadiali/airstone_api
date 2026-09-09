@@ -59,19 +59,63 @@ const COMPANY_CONTACT_SELECT = [
 ].join(" ");
 
 /**
+ * How the list expands a company's branches and the people at them.
+ *
+ * `addresses` and `contacts` are populate virtuals rather than stored arrays --
+ * a child knows its parent, the parent keeps no list -- so nothing is fetched
+ * until this spec asks for it.
+ *
+ * Each `match` hides deactivated children. A company that is still traded with
+ * should not list a branch that has closed, and the row would otherwise
+ * contradict what the address and contact endpoints return. This is presentation
+ * rather than protection: the rows are still there, and any query that forgets
+ * the match will see them.
+ *
+ * The children shown are all of the company's active ones, never only those that
+ * matched a filter. A search decides which companies appear, not what each one
+ * contains, so a row is the same complete picture of the company however it was
+ * found.
+ */
+const COMPANY_TREE_POPULATE = Object.freeze([
+  Object.freeze({
+    path: "addresses",
+    select: COMPANY_ADDRESS_SELECT,
+    match: { is_active: true },
+    populate: Object.freeze({
+      path: "contacts",
+      select: COMPANY_CONTACT_SELECT,
+      match: { is_active: true },
+    }),
+  }),
+]);
+
+/**
  * The shape every company response is built from.
  *
- * Read through `get_response_shape(company_response, "<action>")`. Only
- * `default` is declared, so every action falls back to it and one company reads
- * the same whichever endpoint returned it.
+ * Read through `get_response_shape(company_response, "<action>")`.
  *
- * `populate` is empty. A company references only the staff accounts that created
- * and updated it, and neither is returned.
+ * `default` is the bare company, and it is what create, update and delete
+ * answer with. Its `populate` is empty: a company references only the staff
+ * accounts that created and updated it, and neither is returned.
+ *
+ * `list` is the same columns with the tree hung off them, because a table of
+ * companies is the one place a reader wants the branches and the people without
+ * asking again. It is a variant rather than a change to `default` so a create
+ * reply does not start carrying an empty `addresses` array for children it just
+ * wrote and already returned.
+ *
+ * Both selects list the company's own columns only. `addresses` is a virtual, so
+ * it is not a column a projection has to name -- naming it would ask the
+ * database for a field that does not exist.
  */
 const company_response = Object.freeze({
   default: Object.freeze({
     select: COMPANY_SELECT,
     populate: Object.freeze([]),
+  }),
+  list: Object.freeze({
+    select: COMPANY_SELECT,
+    populate: COMPANY_TREE_POPULATE,
   }),
 });
 
