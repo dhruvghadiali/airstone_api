@@ -90,6 +90,7 @@ Send the returned JWT with every authenticated request as
   Admin only
 - `DELETE /admin/companies/addresses/:id` — deactivate one address and its
   contacts. Admin only
+- `DELETE /admin/companies/contacts/:id` — deactivate one contact. Admin only
 
 The body accepts `company_name`, `company_type`, `email`, `phone_number`,
 `gst_number`, `pan_number` and `address`. `company_type` is one of `supplier`,
@@ -133,7 +134,9 @@ rows, takes no body, and cascades downwards only.
 Deleting a company deactivates the company, every one of its addresses and every
 one of its contacts. Deleting one address deactivates that address and the
 contacts at it, and leaves the company alone — closing a branch says nothing
-about whether the firm is still traded with. Each cascade is one transaction.
+about whether the firm is still traded with. Deleting one contact deactivates
+that contact and nothing else. The two cascading deletes are each one
+transaction; the contact delete is a single write.
 
 A row that is already deactivated answers 404, so a repeat call cannot overwrite
 the `updated_by` of the deletion that came first. Deleting a company's last
