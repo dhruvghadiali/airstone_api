@@ -7,5 +7,9 @@
  * entities exist.
  */
 const company_id_params_schema = require("@validators/route_params/company_id_params_validator");
+const company_address_id_params_schema = require("@validators/route_params/company_address_id_params_validator");
 
-module.exports = { company_id_params_schema };
+module.exports = {
+  company_id_params_schema,
+  company_address_id_params_schema,
+};

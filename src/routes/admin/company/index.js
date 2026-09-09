@@ -8,6 +8,7 @@ const {
 
 const create_company_route = require("@routes/admin/company/create_company_route");
 const update_company_route = require("@routes/admin/company/update_company_route");
+const update_company_address_route = require("@routes/admin/company/update_company_address_route");
 
 const router = express.Router();
 
@@ -22,15 +23,21 @@ const router = express.Router();
  * is day to day work, and the super admin router is for the things only it can
  * do -- creating admins, and bootstrapping itself.
  *
- * Create and update exist today. There is no get, list or delete route yet, by
- * design rather than by oversight: the endpoints have not been asked for.
+ * Create, update, and update one address exist today. There is no get, list or
+ * delete route yet, by design rather than by oversight: the endpoints have not
+ * been asked for.
  *
- * Update changes the company's own columns only. An address and a contact are
- * rows with ids of their own, so editing them needs endpoints that can name the
- * row, and those have not been built.
+ * Each update touches one collection. `PATCH /:id` changes the company's own
+ * columns and `PATCH /addresses/:id` changes one address, so neither can reach
+ * across into rows the caller did not name. Contacts have no endpoint yet.
+ *
+ * `/addresses/:id` is mounted before `/:id`. Express would not confuse the two
+ * -- `/:id` matches a single segment -- but mounting the more specific path
+ * first is the project's rule and costs nothing.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
 router.use(create_company_route);
+router.use(update_company_address_route);
 router.use(update_company_route);
 
 module.exports = router;

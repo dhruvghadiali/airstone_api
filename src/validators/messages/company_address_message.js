@@ -7,6 +7,10 @@ const {
  * in the body points at no company, or at one that has been deactivated. The
  * controller raises it before the write; the schema only declares the `ref`.
  *
+ * `UPDATE_MIN` is what an empty PATCH body is answered with. A request that
+ * names no field is a call that would do nothing, and telling the caller so
+ * beats a 200 that changed nothing.
+ *
  * `CONTACT_PERSON_LIST_*` are about the `contact_person` array a create body
  * nests under each address. The contact's own wording lives in
  * `company_contact_validation_messages`.
@@ -23,6 +27,7 @@ const company_address_messages = Object.freeze({
   UPDATED: "Company address updated successfully",
   DELETED: "Company address deleted successfully",
   NOT_FOUND: "Company address not found",
+  INVALID_ID: "Invalid company address id",
 });
 
 const company_address_validation_messages = Object.freeze({
@@ -41,6 +46,7 @@ const company_address_validation_messages = Object.freeze({
   PINCODE_MIN: `Pincode must be exactly ${company_address_validation_limits.PINCODE_LENGTH} digits`,
   PINCODE_MAX: `Pincode must be exactly ${company_address_validation_limits.PINCODE_LENGTH} digits`,
   PINCODE_INVALID: `Pincode must be ${company_address_validation_limits.PINCODE_LENGTH} digits and cannot start with zero`,
+  UPDATE_MIN: "At least one field must be sent to update an address",
   CONTACT_PERSON_LIST_REQUIRED: "At least one contact person is required",
   CONTACT_PERSON_LIST_BASE: "Contact person must be a list of contacts",
   CONTACT_PERSON_LIST_MIN: `An address needs at least ${company_address_validation_limits.CONTACT_PERSON_LIST_MIN_ITEMS} contact person`,
