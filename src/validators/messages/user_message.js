@@ -1,4 +1,4 @@
-const { user_type } = require("@enums");
+const { user_type, manageable_user_types } = require("@enums");
 const {
   emp_id_generation,
   user_validation_limits,
@@ -14,8 +14,21 @@ const {
  */
 const user_types = Object.values(user_type).join(", ");
 
+/**
+ * The user types the super admin's user table may be narrowed to.
+ *
+ * A second list rather than a slice of the one above, because the two answer
+ * different questions. `user_types` is every role an account may hold, and is
+ * what a create body is measured against. This one is every role that table can
+ * show, and a super admin is not on it -- so a message built from `user_types`
+ * would name a value the filter refuses.
+ */
+const manageable_types = manageable_user_types.join(", ");
+
 const user_messages = Object.freeze({
   CREATED: "Super admin account created successfully",
+  LISTED: "Users fetched successfully",
+  EMPLOYEES_LISTED: "Employees fetched successfully",
   SIGNED_IN: "Super admin signed in successfully",
   ADMIN_CREATED: "Admin account created successfully",
   EMPLOYEE_CREATED: "Employee account created successfully",
@@ -78,7 +91,10 @@ const user_validation_messages = Object.freeze({
   EMP_ID_INVALID: `Employee id must be exactly ${user_validation_limits.EMP_ID_MAX} alphanumeric characters`,
   USER_TYPE_REQUIRED: "User type is required",
   USER_TYPE_BASE: "User type must be a string",
+  USER_TYPE_EMPTY: "User type cannot be empty",
   USER_TYPE_INVALID: `User type must be one of: ${user_types}`,
+  USER_TYPE_UNLISTABLE: `User type must be one of: ${manageable_types}`,
+  IS_ACTIVE_BASE: "Active flag must be true or false",
   UNKNOWN_FIELD: "Request body contains an unsupported field",
 });
 

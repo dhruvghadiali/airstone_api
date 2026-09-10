@@ -6,6 +6,10 @@
  * factory in `src/validators/query_params/factory/`, and is re-exported here, so
  * a route imports one name from one place.
  */
+const { list_users_query_schema } = require("@validators/query_params/user");
+const {
+  list_employees_query_schema,
+} = require("@validators/query_params/employee");
 const {
   list_companies_query_schema,
 } = require("@validators/query_params/company");
@@ -14,6 +18,8 @@ const {
 } = require("@validators/query_params/company_contact");
 
 module.exports = {
+  list_users_query_schema,
+  list_employees_query_schema,
   list_companies_query_schema,
   list_company_contacts_query_schema,
 };
