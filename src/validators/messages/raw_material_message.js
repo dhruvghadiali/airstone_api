@@ -1,4 +1,4 @@
-const { unit_of_measure } = require("@enums");
+const { raw_material_unit_of_measure } = require("@enums");
 const {
   raw_material_validation_limits,
 } = require("@validators/constants/raw_material_constants");
@@ -9,7 +9,7 @@ const {
  * Built from the enum rather than typed out, so adding or removing a unit
  * updates this message on its own.
  */
-const units_of_measure = Object.values(unit_of_measure).join(", ");
+const units_of_measure = Object.values(raw_material_unit_of_measure).join(", ");
 
 /**
  * `CODE_EXISTS` is what a duplicate key on `material_code` should be reported

@@ -1,9 +1,9 @@
 /**
  * The fixed value sets the raw material feature stores.
  *
- * `unit_of_measure` is how a raw material is counted when it is bought and when
- * its stock is read. One material has one unit, so a purchase made in another
- * unit is converted before it is recorded.
+ * `raw_material_unit_of_measure` is how a raw material is counted when it is
+ * bought and when its stock is read. One material has one unit, so a purchase
+ * made in another unit is converted before it is recorded.
  *
  * The set covers the three ways this business measures stock: by weight, by
  * volume, and by count. `bag` is a count and not a weight, because a bag of
@@ -14,7 +14,7 @@
  *
  * @type {Readonly<Object<string, string>>}
  */
-const unit_of_measure = Object.freeze({
+const raw_material_unit_of_measure = Object.freeze({
   BAG: "bag",
   GRAM: "gram",
   LITRE: "litre",
@@ -24,4 +24,4 @@ const unit_of_measure = Object.freeze({
   METRIC_TONNE: "metric_tonne",
 });
 
-module.exports = { unit_of_measure };
+module.exports = { raw_material_unit_of_measure };

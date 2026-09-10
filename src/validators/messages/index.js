@@ -40,6 +40,15 @@ const {
   raw_material_validation_messages,
 } = require("@validators/messages/raw_material_message");
 
+const {
+  raw_material_purchase_messages,
+  raw_material_purchase_validation_messages,
+} = require("@validators/messages/raw_material_purchase_message");
+const {
+  raw_material_purchase_payment_messages,
+  raw_material_purchase_payment_validation_messages,
+} = require("@validators/messages/raw_material_purchase_payment_message");
+
 module.exports = {
   error_messages,
   sort_field_message,
@@ -54,4 +63,8 @@ module.exports = {
   company_address_validation_messages,
   raw_material_messages,
   raw_material_validation_messages,
+  raw_material_purchase_messages,
+  raw_material_purchase_validation_messages,
+  raw_material_purchase_payment_messages,
+  raw_material_purchase_payment_validation_messages,
 };

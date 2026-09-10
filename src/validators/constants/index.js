@@ -51,6 +51,13 @@ const {
   raw_material_validation_patterns,
 } = require("@validators/constants/raw_material_constants");
 
+const {
+  raw_material_purchase_validation_limits,
+} = require("@validators/constants/raw_material_purchase_constants");
+const {
+  raw_material_purchase_payment_validation_limits,
+} = require("@validators/constants/raw_material_purchase_payment_constants");
+
 module.exports = {
   app_time,
   financial_year,
@@ -73,4 +80,6 @@ module.exports = {
   company_address_validation_limits,
   raw_material_validation_limits,
   raw_material_validation_patterns,
+  raw_material_purchase_validation_limits,
+  raw_material_purchase_payment_validation_limits,
 };

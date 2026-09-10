@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const { unit_of_measure } = require("@enums");
+const { raw_material_unit_of_measure } = require("@enums");
 const { raw_material_validation_messages } = require("@validators/messages");
 const {
   raw_material_validation_limits,
@@ -88,7 +88,7 @@ const raw_material_schema = new mongoose.Schema(
       type: String,
       required: [true, raw_material_validation_messages.UNIT_REQUIRED],
       enum: {
-        values: Object.values(unit_of_measure),
+        values: Object.values(raw_material_unit_of_measure),
         message: raw_material_validation_messages.UNIT_INVALID,
       },
       index: true,
