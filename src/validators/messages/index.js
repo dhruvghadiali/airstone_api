@@ -35,6 +35,11 @@ const {
   company_address_validation_messages,
 } = require("@validators/messages/company_address_message");
 
+const {
+  raw_material_messages,
+  raw_material_validation_messages,
+} = require("@validators/messages/raw_material_message");
+
 module.exports = {
   error_messages,
   sort_field_message,
@@ -47,4 +52,6 @@ module.exports = {
   company_contact_validation_messages,
   company_address_messages,
   company_address_validation_messages,
+  raw_material_messages,
+  raw_material_validation_messages,
 };

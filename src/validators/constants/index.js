@@ -46,6 +46,11 @@ const {
   company_address_validation_limits,
 } = require("@validators/constants/company_address_constants");
 
+const {
+  raw_material_validation_limits,
+  raw_material_validation_patterns,
+} = require("@validators/constants/raw_material_constants");
+
 module.exports = {
   app_time,
   financial_year,
@@ -66,4 +71,6 @@ module.exports = {
   company_validation_patterns,
   company_contact_validation_limits,
   company_address_validation_limits,
+  raw_material_validation_limits,
+  raw_material_validation_patterns,
 };
