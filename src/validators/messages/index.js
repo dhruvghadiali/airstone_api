@@ -49,6 +49,18 @@ const {
   raw_material_purchase_payment_validation_messages,
 } = require("@validators/messages/raw_material_purchase_payment_message");
 
+const {
+  raw_material_stock_entry_messages,
+  raw_material_stock_entry_validation_messages,
+} = require("@validators/messages/raw_material_stock_entry_message");
+const {
+  raw_material_stock_entry_bill_messages,
+  raw_material_stock_entry_bill_validation_messages,
+} = require("@validators/messages/raw_material_stock_entry_bill_message");
+const {
+  raw_material_stock_entry_vehicle_validation_messages,
+} = require("@validators/messages/raw_material_stock_entry_vehicle_message");
+
 module.exports = {
   error_messages,
   sort_field_message,
@@ -67,4 +79,9 @@ module.exports = {
   raw_material_purchase_validation_messages,
   raw_material_purchase_payment_messages,
   raw_material_purchase_payment_validation_messages,
+  raw_material_stock_entry_messages,
+  raw_material_stock_entry_validation_messages,
+  raw_material_stock_entry_bill_messages,
+  raw_material_stock_entry_bill_validation_messages,
+  raw_material_stock_entry_vehicle_validation_messages,
 };

@@ -58,6 +58,16 @@ const {
   raw_material_purchase_payment_validation_limits,
 } = require("@validators/constants/raw_material_purchase_payment_constants");
 
+const {
+  raw_material_stock_entry_validation_limits,
+} = require("@validators/constants/raw_material_stock_entry_constants");
+const {
+  raw_material_stock_entry_bill_validation_limits,
+} = require("@validators/constants/raw_material_stock_entry_bill_constants");
+const {
+  raw_material_stock_entry_vehicle_validation_limits,
+} = require("@validators/constants/raw_material_stock_entry_vehicle_constants");
+
 module.exports = {
   app_time,
   financial_year,
@@ -82,4 +92,7 @@ module.exports = {
   raw_material_validation_patterns,
   raw_material_purchase_validation_limits,
   raw_material_purchase_payment_validation_limits,
+  raw_material_stock_entry_validation_limits,
+  raw_material_stock_entry_bill_validation_limits,
+  raw_material_stock_entry_vehicle_validation_limits,
 };
