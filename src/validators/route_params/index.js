@@ -6,11 +6,13 @@
  * here, so a router imports one name from one place regardless of how many
  * entities exist.
  */
+const user_id_params_schema = require("@validators/route_params/user_id_params_validator");
 const company_id_params_schema = require("@validators/route_params/company_id_params_validator");
 const company_contact_id_params_schema = require("@validators/route_params/company_contact_id_params_validator");
 const company_address_id_params_schema = require("@validators/route_params/company_address_id_params_validator");
 
 module.exports = {
+  user_id_params_schema,
   company_id_params_schema,
   company_contact_id_params_schema,
   company_address_id_params_schema,

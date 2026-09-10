@@ -7,6 +7,7 @@ const {
 } = require("@middlewares/authenticate_user");
 
 const list_users_route = require("@routes/super_admin/user/list_users_route");
+const delete_user_route = require("@routes/super_admin/user/delete_user_route");
 
 const router = express.Router();
 
@@ -23,21 +24,25 @@ const router = express.Router();
  * an admin creates. Reading every account in the system, admins included, is a
  * super admin's business.
  *
- * `GET /` is the only route today, and the missing ones are missing by design
- * rather than by oversight. There is no create route because an account is
- * created through the signup that names the role it makes -- an admin at
- * `/super-admin/auth/admin/signup`, an employee at `/admin/auth/employee/signup`
- * -- and a second door onto the same write would be a second place to forget to
- * fix the new account's user type. There is no get, update or delete route
- * because none has been asked for; `manageable_user_types` exists for the day
- * they are.
+ * `GET /` lists the accounts and `DELETE /:id` deactivates one. The rest are
+ * missing by design rather than by oversight. There is no create route because
+ * an account is created through the signup that names the role it makes -- an
+ * admin at `/super-admin/auth/admin/signup`, an employee at
+ * `/admin/auth/employee/signup` -- and a second door onto the same write would
+ * be a second place to forget to fix the new account's user type. There is no
+ * get or update route because neither has been asked for.
  *
- * The list never shows a super admin and never returns a password. Neither is
- * this file's doing: the first is a `base_filter` in the list config, the second
- * is `select: false` on the schema. They are written down here because a reader
- * checking who can see what starts at the router.
+ * The delete is a soft delete and reverses nothing: no route here brings an
+ * account back, and a deactivated one cannot sign in.
+ *
+ * Neither route can reach a super admin, and neither returns a password. None of
+ * that is this file's doing: the list is scoped by a `base_filter` in its
+ * config, the delete by the user types its controller passes to the helper, and
+ * the password by `select: false` on the schema. They are written down here
+ * because a reader checking who can see and change what starts at the router.
  */
 router.use(authenticate_user, authorize_user_types(user_type.SUPER_ADMIN));
 router.use(list_users_route);
+router.use(delete_user_route);
 
 module.exports = router;

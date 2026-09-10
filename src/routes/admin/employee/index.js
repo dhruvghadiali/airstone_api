@@ -7,6 +7,7 @@ const {
 } = require("@middlewares/authenticate_user");
 
 const list_employees_route = require("@routes/admin/employee/list_employees_route");
+const delete_employee_route = require("@routes/admin/employee/delete_employee_route");
 
 const router = express.Router();
 
@@ -23,19 +24,25 @@ const router = express.Router();
  * windows, so a super admin reaching this router would only be reading a
  * narrower copy of what it already has.
  *
- * `GET /` is the only route today, and the missing ones are missing by design.
- * There is no create route because an employee account is created through the
- * signup that names the role it makes, at `/admin/auth/employee/signup`, and a
- * second door onto the same write would be a second place to forget to fix the
- * new account's user type. There is no get, update or delete route because none
- * has been asked for.
+ * `GET /` lists the employees and `DELETE /:id` deactivates one. The rest are
+ * missing by design. There is no create route because an employee account is
+ * created through the signup that names the role it makes, at
+ * `/admin/auth/employee/signup`, and a second door onto the same write would be
+ * a second place to forget to fix the new account's user type. There is no get
+ * or update route because neither has been asked for.
  *
- * The list shows employees and nothing else, and never returns a password.
- * Neither is this file's doing: the first is a `base_filter` in the list config,
- * the second is `select: false` on the schema. They are written down here
- * because a reader checking who can see what starts at the router.
+ * The delete is a soft delete and reverses nothing: no route here brings an
+ * employee back, and a deactivated account cannot sign in.
+ *
+ * Both routes see employees and nothing else, so an admin cannot read or delete
+ * another admin's account, or their own. Neither returns a password. None of
+ * that is this file's doing: the list is scoped by a `base_filter` in its
+ * config, the delete by the user type its controller passes to the helper, and
+ * the password by `select: false` on the schema. They are written down here
+ * because a reader checking who can see and change what starts at the router.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
 router.use(list_employees_route);
+router.use(delete_employee_route);
 
 module.exports = router;
