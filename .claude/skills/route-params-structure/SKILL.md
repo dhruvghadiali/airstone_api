@@ -97,11 +97,17 @@ Use these names consistently:
 | `company` | `company_id_params_validator.js` | `company_id_params_schema` |
 | `company_address` | `company_address_id_params_validator.js` | `company_address_id_params_schema` |
 | `company_contact` | `company_contact_id_params_validator.js` | `company_contact_id_params_schema` |
-| `employee` | `employee_id_params_validator.js` | `employee_id_params_schema` |
+| `user` | `user_id_params_validator.js` | `user_id_params_schema` |
 | `product` | `product_id_params_validator.js` | `product_id_params_schema` |
 | `purchase` | `purchase_id_params_validator.js` | `purchase_id_params_schema` |
 | `sale` | `sale_id_params_validator.js` | `sale_id_params_schema` |
 | `stock` | `stock_id_params_validator.js` | `stock_id_params_schema` |
+
+One schema serves every route that names a row in the same collection, whatever the URL calls it.
+`user_id_params_schema` validates the id on both `DELETE /super-admin/users/:id` and
+`DELETE /admin/employees/:id`, because both name an account by the same id; which accounts each
+route may reach is its controller's scope, not the schema's. A second, identical schema per route
+would only be a copy that drifts.
 
 When adding a validator:
 

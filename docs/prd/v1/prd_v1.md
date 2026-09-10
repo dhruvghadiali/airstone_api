@@ -100,10 +100,21 @@ because there is only ever one and it is made at install time.
 | Create a second super admin | Never | Never | Never |
 | Create an admin | Yes | No | No |
 | Create an employee | No | Yes | No |
+| See the list of admin accounts | Yes | No | No |
+| See the list of employee accounts | Yes | Yes | No |
+| Turn off an admin account | Yes | No | No |
+| Turn off an employee account | Yes | Yes | No |
+| Turn off a super admin account | Never | Never | Never |
 
 ¹ This one has to be open. There is no account yet, so there is nobody to
 approve it. It stops working as soon as the super admin exists, so it is open
 only until it is first used.
+
+Turning an account off does not delete it. The record stays, marked as not
+active, and the person can no longer log in. Nothing in version 1 turns one back
+on. A super admin account is left out of every row above on purpose: there is
+only one, and the system must not offer a way to remove the only account that
+can make an admin.
 
 ---
 

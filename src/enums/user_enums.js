@@ -5,9 +5,14 @@ const user_type = Object.freeze({
 });
 
 /**
- * The user types a super admin may create, edit, or delete through the employee
- * router. Super admins are deliberately excluded so the endpoint can never be
- * used to remove the last administrator.
+ * The user types a super admin may see and act on through the super admin's user
+ * routes. The list is scoped to them and the delete may only reach them, so what
+ * a super admin can see and what they can deactivate cannot drift apart.
+ *
+ * Super admins are deliberately excluded, and neither route can reach one. The
+ * list can therefore never enumerate the accounts that administer the system,
+ * and the delete can never remove the last account able to create an
+ * administrator -- including the caller's own.
  */
 const manageable_user_types = Object.freeze([
   user_type.ADMIN,

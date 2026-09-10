@@ -108,13 +108,13 @@ never done in the same edit as widening what may be **sorted**. A composed file 
 into the single object both consumers read.
 
 ```
-src/validators/query_params/employee/
+src/validators/query_params/user/
   config/
     filter_config.js    base_filter, text_filters, exact_filters, date_filters
     search_config.js    search_fields
     sort_config.js      sort_fields, text_sort_fields
-  list_employees_config.js            <- spreads the three
-  list_employees_query_validator.js   <- builds the Joi schema from the composed config
+  list_users_config.js            <- spreads the three
+  list_users_query_validator.js   <- builds the Joi schema from the composed config
   index.js
 ```
 
@@ -122,7 +122,7 @@ Each file exports one frozen object named `<feature>_<concern>_config`:
 
 ```js
 /**
- * What the employee table may be ordered by.
+ * What the user table may be ordered by.
  *
  * `sort_fields` is the whitelist -- a column absent from it is a 400, not a
  * silently ignored parameter.
@@ -132,7 +132,7 @@ Each file exports one frozen object named `<feature>_<concern>_config`:
  * actually typed in free text are listed, because collation costs the database
  * something and buys nothing anywhere else.
  */
-const employee_sort_config = Object.freeze({
+const user_sort_config = Object.freeze({
   sort_fields: Object.freeze([
     "first_name",
     "last_name",
@@ -142,24 +142,24 @@ const employee_sort_config = Object.freeze({
   text_sort_fields: Object.freeze(["first_name", "last_name"]),
 });
 
-module.exports = { employee_sort_config };
+module.exports = { user_sort_config };
 ```
 
 The composed file does nothing but assemble, and says what it is:
 
 ```js
 const {
-  employee_sort_config,
-} = require("@validators/query_params/employee/config/sort_config");
+  user_sort_config,
+} = require("@validators/query_params/user/config/sort_config");
 const {
-  employee_filter_config,
-} = require("@validators/query_params/employee/config/filter_config");
+  user_filter_config,
+} = require("@validators/query_params/user/config/filter_config");
 const {
-  employee_search_config,
-} = require("@validators/query_params/employee/config/search_config");
+  user_search_config,
+} = require("@validators/query_params/user/config/search_config");
 
 /**
- * The employee table's contract, assembled from the three files under
+ * The user table's contract, assembled from the three files under
  * `config/` -- one per concern, so widening what may be filtered is never done
  * in the same edit as widening what may be sorted.
  *
@@ -170,13 +170,13 @@ const {
  *
  * Pagination is deliberately absent -- see §6.
  */
-const list_employees_config = Object.freeze({
-  ...employee_filter_config,
-  ...employee_search_config,
-  ...employee_sort_config,
+const list_users_config = Object.freeze({
+  ...user_filter_config,
+  ...user_search_config,
+  ...user_sort_config,
 });
 
-module.exports = { list_employees_config };
+module.exports = { list_users_config };
 ```
 
 Rules:
@@ -190,6 +190,50 @@ Rules:
 - Every key is optional and every one defaults to "nothing is allowed". A config with no
   `sort_fields` permits no sorting; one with no `text_filters` permits no column filters. Silence
   means closed, never open -- with **one exception**, in §6.
+
+### A second view of the same collection
+
+Sometimes two roles read the same rows through different windows: a super admin sees admins and
+employees at `/super-admin/users`, an admin sees employees at `/admin/employees`. These are the same
+documents with the same columns, and the **only** thing that differs is the scope.
+
+Do not copy the three concern files. The second feature declares its own `filter_config.js` -- the
+scope is what makes it a separate feature -- and its composed config reads search and sort straight
+from the first:
+
+```js
+const {
+  user_sort_config,
+} = require("@validators/query_params/user/config/sort_config");
+const {
+  user_search_config,
+} = require("@validators/query_params/user/config/search_config");
+const {
+  employee_filter_config,
+} = require("@validators/query_params/employee/config/filter_config");
+
+const list_employees_config = Object.freeze({
+  ...employee_filter_config,
+  ...user_search_config,
+  ...user_sort_config,
+});
+```
+
+Making a column sortable then changes both tables in one edit, which is the intent -- a caller
+should not find that a column orders one role's table and 400s on another's. `employee_filter_config`
+reuses the first feature's `text_filters` and its `is_active` schema by reading them off
+`user_filter_config` for the same reason.
+
+This is the one place a config file may import another feature's config file, and the importing
+file's header must say which feature owns the columns and that a genuine divergence means declaring
+its own file rather than editing the shared one.
+
+**The scope column must not be exposed as an `exact_filter` on the narrower view.** An exact filter
+replaces the base scope for its column (§4), so on the admin's employee table there is no
+`user_type` filter at all: with one type in scope there is nothing to narrow to, and exposing the
+column would hand the caller a way to ask for another. `?user_type=admin` is a 400 saying the
+parameter is not allowed, which is the honest answer. The wider view may expose it, but only with a
+Joi `valid(...)` list no broader than its own base scope.
 
 ## 4. The keys
 
@@ -209,9 +253,10 @@ Rules:
 ### base_filter
 
 An always-on scope the caller cannot switch off — `{ user_type: { $in: manageable_user_types } }`
-is what stops the employee table being used to enumerate administrators. Use it for a security or
-tenancy boundary, never for a default the caller should be able to change; that is what a default in
-the schema is for.
+on the user table is what stops it being used to enumerate super admins, and
+`{ user_type: user_type.EMPLOYEE }` on the employee table is what keeps an admin out of another
+admin's account. Use it for a security or tenancy boundary, never for a default the caller should be
+able to change; that is what a default in the schema is for.
 
 Note the interaction: an `exact_filter` on the same column **replaces** the base scope rather than
 intersecting with it. That is deliberate — asking for one user type should not still be ORed with
@@ -243,6 +288,14 @@ when it happens to equal `text_filters` — the point is that the next person se
 than an omission. Keep out of it anything that is an identifier rather than a name (emails,
 usernames, employee ids, GST numbers) unless the table exists to look those up, and anything long
 enough to match everything (a description, an address blob).
+
+That exception is real and two configs take it. The company table searches `email`, `gst_number` and
+`pan_number` because an admin looking a firm up usually has a number off an invoice rather than a
+name they can spell. The user table searches `email`, `phone_number`, `emp_id` and `username` for
+the same reason. Both write the trade-off into the header rather than leaving it implied: one term
+tried against an identifier column matches widely, so `?search=98` lists everybody whose phone
+number contains those digits. Take the exception when the table exists to look people or firms up,
+and say in the header that you took it and what it costs.
 
 A column may be searchable without being filterable, and filterable without being searchable. The
 two lists are independent.
@@ -507,16 +560,16 @@ work that belongs in `src/helpers/list_query/`.
 
 ```js
 /**
- * What the employee table may be narrowed by.
+ * What the user table may be narrowed by.
  *
  * `base_filter` is always applied and cannot be switched off by the caller:
- * super admins are never listed, so the endpoint cannot be used to reach an
- * administrator account.
+ * super admins are never listed, so the endpoint cannot be used to enumerate
+ * the accounts that administer the system.
  *
  * `text_filters` are the per column boxes in the table header. Each narrows
  * independently, so they combine with AND.
  */
-const employee_filter_config = Object.freeze({
+const user_filter_config = Object.freeze({
   base_filter: Object.freeze({ user_type: { $in: manageable_user_types } }),
   text_filters: Object.freeze(["first_name", "last_name", "email"]),
 });
@@ -525,7 +578,7 @@ const employee_filter_config = Object.freeze({
 Not this:
 
 ```js
-const employee_filter_config = Object.freeze({
+const user_filter_config = Object.freeze({
   // Super admins are never listed here...     <- no comments inside the object
   base_filter: Object.freeze({ ... }),
 });
@@ -535,9 +588,11 @@ What the header must carry:
 
 - what the file is, in one line;
 - for each key, why it holds the values it does — not what the key means, which §4 already says;
-- any invariant a reader could otherwise undo. The employee filter config, for example, records
-  that its `base_filter` scope is overridden by the `user_type` exact filter and that only the Joi
-  `valid(...)` list keeps administrators out.
+- any invariant a reader could otherwise undo. The user filter config, for example, records that
+  its `base_filter` scope is overridden by the `user_type` exact filter beside it, so only that
+  filter's Joi `valid(...)` list keeps super admins out of reach. The employee filter config records
+  the opposite decision -- that it exposes no `user_type` filter at all -- because an absent
+  parameter is invisible, and a reader has to be told it is missing on purpose.
 
 Never restate a key name. `// the columns that can be sorted` above `sort_fields` earns nothing.
 

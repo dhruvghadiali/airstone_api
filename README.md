@@ -79,6 +79,67 @@ Send the returned JWT with every authenticated request as
 `Authorization: Bearer <token>`. `authenticate_user` reads the token and
 `authorize_user_types(...)` narrows a route to specific roles.
 
+### Users and employees
+
+- `GET /super-admin/users` — list admin and employee accounts, paged.
+  Super admin only
+- `DELETE /super-admin/users/:id` — deactivate an admin or an employee.
+  Super admin only
+- `GET /admin/employees` — list employee accounts, paged. Admin only
+- `DELETE /admin/employees/:id` — deactivate an employee. Admin only
+
+Two views of the same collection through different windows. The super admin's
+sees admins and employees; the admin's sees employees only. Neither can reach a
+super admin account, and no route creates an account — that is what the signups
+under Auth are for.
+
+No endpoint returns `password`. The column is `select: false` on the schema and
+the model strips it again on the way out, so it cannot be reached by asking for
+it: `?password=x` is a 400 and `?sort=password:asc` is a 400.
+
+Both lists accept `page`, `limit`, `search`, `sort` (or `sort_by` +
+`sort_order`), the column filters `first_name`, `last_name`, `email`,
+`phone_number`, `emp_id` and `username`, the exact filter `is_active`, and the
+date range `created_from` / `created_to`. `search` spans all six column filters
+at once, so a name, an email, a phone number, an employee id or a username
+typed into one box finds its owner. One term matched against six columns matches
+widely — `?search=98` lists everybody whose phone number contains those digits —
+so a caller who knows the column should use that column's own filter.
+
+The super admin's list additionally accepts the exact filter `user_type`, which
+takes `admin` or `employee`. `?user_type=super_admin` is a 400 naming the two
+that work. The admin's list has no `user_type` filter at all: with one type in
+scope there is nothing to narrow to, so `?user_type=admin` is a 400 saying the
+parameter is not allowed.
+
+Anything else is a 400 — the contracts are
+`src/validators/query_params/user/` and `src/validators/query_params/employee/`.
+The second declares only its own scope and reads what may be searched and sorted
+from the first, so a column made sortable changes both tables in one edit.
+
+`is_active` defaults to true, so deactivated accounts need `?is_active=false`.
+
+Both deletes are soft deletes: they set `is_active` to false, take no body, and
+cascade nothing. A deactivated account cannot sign in.
+
+The scope is part of the query rather than a check after it, so an account the
+caller may not touch answers **404, not 403** — a 403 would confirm that an id
+names an administrator. An id that does not exist, one already deactivated and
+one above the caller's reach are answered alike. That also makes a repeat call
+harmless: the second one matches nothing and answers 404 rather than overwriting
+a deletion that came first.
+
+A super admin cannot deactivate a super admin, including their own account, so
+the last account able to create administrators cannot be removed through the
+API. An admin cannot deactivate another admin or themselves. Both scopes come
+from `manageable_user_types` and the `user_type` enum, so what a role can see
+and what it can deactivate cannot drift apart.
+
+Nothing records who performed a delete. `user_model` carries no `updated_by`, so
+a deactivated row knows it was deactivated and not by whom. Nothing reverses one
+either: there is no restore route, so bringing an account back is a database job
+today.
+
 ### Companies
 
 - `GET /admin/companies` — list companies, paged. Admin only

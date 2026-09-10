@@ -526,6 +526,10 @@ Base address in development: `http://localhost:3000`
 
 ### 6.1 The addresses
 
+Every address the server answers, grouped by what it is for.
+
+**Signing up and logging in**
+
 | Method | Address | Pass needed | What it does |
 | ------ | ------- | ----------- | ------------ |
 | POST | `/super-admin/auth/signup` | No | Creates the one super admin. Refuses once it exists |
@@ -534,7 +538,47 @@ Base address in development: `http://localhost:3000`
 | POST | `/employee/auth/signin` | No | Logs an employee in |
 | POST | `/super-admin/auth/admin/signup` | Super admin | Creates an admin |
 | POST | `/admin/auth/employee/signup` | Admin | Creates an employee |
+
+**Accounts**
+
+| Method | Address | Pass needed | What it does |
+| ------ | ------- | ----------- | ------------ |
+| GET | `/super-admin/users` | Super admin | Lists admin and employee accounts, a page at a time |
+| DELETE | `/super-admin/users/:id` | Super admin | Turns off one admin or employee account |
+| GET | `/admin/employees` | Admin | Lists employee accounts, a page at a time |
+| DELETE | `/admin/employees/:id` | Admin | Turns off one employee account |
+
+No account address ever sends back a password, and none of them creates an
+account — the signups above are the only way in. A super admin account cannot be
+listed or turned off by any of them, so the last account able to make an admin
+cannot be removed through the server. See 5.7 for who may act on whom.
+
+**Companies**
+
+| Method | Address | Pass needed | What it does |
+| ------ | ------- | ----------- | ------------ |
+| POST | `/admin/companies` | Admin | Creates a company with its addresses and their contacts |
+| GET | `/admin/companies` | Admin | Lists companies with their addresses and contacts, a page at a time |
+| GET | `/admin/companies/contacts` | Admin | Lists contacts across every company, a page at a time |
+| PATCH | `/admin/companies/:id` | Admin | Changes a company's own details |
+| PATCH | `/admin/companies/addresses/:id` | Admin | Changes one address |
+| PATCH | `/admin/companies/contacts/:id` | Admin | Changes one contact |
+| DELETE | `/admin/companies/:id` | Admin | Turns off a company, its addresses and its contacts |
+| DELETE | `/admin/companies/addresses/:id` | Admin | Turns off one address and the contacts at it |
+| DELETE | `/admin/companies/contacts/:id` | Admin | Turns off one contact |
+
+The three company collections are described in 4.5 to 4.8. What each body
+accepts, field by field, is in the README rather than here.
+
+**Files**
+
+| Method | Address | Pass needed | What it does |
+| ------ | ------- | ----------- | ------------ |
 | GET | `/assets/*` | No | Images and styles |
+
+Every delete in this document is a soft delete: it sets `is_active` to false and
+leaves the row where it is. Nothing reverses one. A row that is already turned
+off answers 404, so calling a delete twice changes nothing the second time.
 
 **Signup takes:** `first_name`, `last_name`, `email`, `phone_number`,
 `username`, `password`. `emp_id` and `user_type` are set by the server, and the
