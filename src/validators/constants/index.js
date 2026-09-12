@@ -76,6 +76,13 @@ const {
   manufacturing_product_raw_material_validation_limits,
 } = require("@validators/constants/manufacturing_product_raw_material_constants");
 
+const {
+  manufacturing_log_validation_limits,
+} = require("@validators/constants/manufacturing_log_constants");
+const {
+  manufacturing_log_raw_material_validation_limits,
+} = require("@validators/constants/manufacturing_log_raw_material_constants");
+
 module.exports = {
   app_time,
   financial_year,
@@ -106,4 +113,6 @@ module.exports = {
   manufacturing_product_validation_limits,
   manufacturing_product_validation_patterns,
   manufacturing_product_raw_material_validation_limits,
+  manufacturing_log_validation_limits,
+  manufacturing_log_raw_material_validation_limits,
 };
