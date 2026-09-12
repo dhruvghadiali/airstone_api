@@ -79,6 +79,15 @@ const {
   manufacturing_log_raw_material_validation_messages,
 } = require("@validators/messages/manufacturing_log_raw_material_message");
 
+const {
+  commercial_product_messages,
+  commercial_product_validation_messages,
+} = require("@validators/messages/commercial_product_message");
+const {
+  commercial_product_manufactured_product_messages,
+  commercial_product_manufactured_product_validation_messages,
+} = require("@validators/messages/commercial_product_manufactured_product_message");
+
 module.exports = {
   error_messages,
   sort_field_message,
@@ -110,4 +119,8 @@ module.exports = {
   manufacturing_log_validation_messages,
   manufacturing_log_raw_material_messages,
   manufacturing_log_raw_material_validation_messages,
+  commercial_product_messages,
+  commercial_product_validation_messages,
+  commercial_product_manufactured_product_messages,
+  commercial_product_manufactured_product_validation_messages,
 };
