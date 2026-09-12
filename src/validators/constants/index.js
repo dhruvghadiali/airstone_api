@@ -90,6 +90,9 @@ const {
 const {
   commercial_product_manufactured_product_validation_limits,
 } = require("@validators/constants/commercial_product_manufactured_product_constants");
+const {
+  commercial_product_stock_validation_limits,
+} = require("@validators/constants/commercial_product_stock_constants");
 
 module.exports = {
   app_time,
@@ -126,4 +129,5 @@ module.exports = {
   commercial_product_validation_limits,
   commercial_product_validation_patterns,
   commercial_product_manufactured_product_validation_limits,
+  commercial_product_stock_validation_limits,
 };

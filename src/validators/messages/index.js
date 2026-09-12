@@ -87,6 +87,10 @@ const {
   commercial_product_manufactured_product_messages,
   commercial_product_manufactured_product_validation_messages,
 } = require("@validators/messages/commercial_product_manufactured_product_message");
+const {
+  commercial_product_stock_messages,
+  commercial_product_stock_validation_messages,
+} = require("@validators/messages/commercial_product_stock_message");
 
 module.exports = {
   error_messages,
@@ -123,4 +127,6 @@ module.exports = {
   commercial_product_validation_messages,
   commercial_product_manufactured_product_messages,
   commercial_product_manufactured_product_validation_messages,
+  commercial_product_stock_messages,
+  commercial_product_stock_validation_messages,
 };

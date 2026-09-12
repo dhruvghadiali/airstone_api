@@ -140,7 +140,8 @@ const commercial_product_schema = new mongoose.Schema(
       ],
     },
     clients: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }],
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Company",
       default: [],
       validate: {
         validator: (value) =>
