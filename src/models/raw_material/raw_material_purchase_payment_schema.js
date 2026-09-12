@@ -35,6 +35,18 @@ const {
  * decimal places it may carry is checked by the request validator, because a
  * model may not import from `@helpers`.
  *
+ * `receipt_url` is a link to the receipt in cloud storage, not the file. Nothing
+ * is stored in the database but the address.
+ *
+ * It is optional because a receipt is rarely to hand when the payment is
+ * recorded: a bank confirmation arrives later, and a cash payment often has no
+ * receipt at all. Requiring it would block a real payment from being entered.
+ *
+ * The schema does not check that the value is a well formed URL. There is no
+ * URL pattern in the project yet, and the bill's `file_url` on the stock entry
+ * is stored the same way. If one is wanted it belongs in `validation_patterns`
+ * in `common` and should cover both fields.
+ *
  * `paid_on` is when the money actually moved, which is not always when the entry
  * was typed. It defaults to now for the common case where the two are the same.
  *
@@ -83,6 +95,19 @@ const raw_material_purchase_payment_schema = new mongoose.Schema(
       max: [
         raw_material_purchase_payment_validation_limits.PAID_AMOUNT_MAX,
         raw_material_purchase_payment_validation_messages.PAID_AMOUNT_MAX,
+      ],
+    },
+    receipt_url: {
+      type: String,
+      trim: true,
+      default: null,
+      minlength: [
+        raw_material_purchase_payment_validation_limits.RECEIPT_URL_MIN,
+        raw_material_purchase_payment_validation_messages.RECEIPT_URL_MIN,
+      ],
+      maxlength: [
+        raw_material_purchase_payment_validation_limits.RECEIPT_URL_MAX,
+        raw_material_purchase_payment_validation_messages.RECEIPT_URL_MAX,
       ],
     },
     paid_on: {

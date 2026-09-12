@@ -14,9 +14,18 @@ const { money_precision } = require("@validators/constants/common");
  *
  * `PAID_AMOUNT_DECIMAL_PLACES` reads `money_precision` for the same reason the
  * purchase's amounts do.
+ *
+ * `RECEIPT_URL_MIN` and `RECEIPT_URL_MAX` bound a link to the receipt in cloud
+ * storage, not the file itself. Nothing is stored in the database but the
+ * address. They match the bill's `FILE_URL` bounds on the stock entry, because
+ * both hold the same kind of thing, but they are declared here rather than
+ * shared: a payment and a bill are different entities and either bound can move
+ * without the other.
  */
 const raw_material_purchase_payment_validation_limits = Object.freeze({
   PAID_AMOUNT_MIN: 0,
+  RECEIPT_URL_MIN: 5,
+  RECEIPT_URL_MAX: 1000,
   PAID_AMOUNT_MAX: 1000000,
   PAYMENT_REFERENCE_MIN: 5,
   PAYMENT_REFERENCE_MAX: 200,
