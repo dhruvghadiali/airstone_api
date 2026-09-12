@@ -61,6 +61,15 @@ const {
   raw_material_stock_entry_vehicle_validation_messages,
 } = require("@validators/messages/raw_material_stock_entry_vehicle_message");
 
+const {
+  manufacturing_product_messages,
+  manufacturing_product_validation_messages,
+} = require("@validators/messages/manufacturing_product_message");
+const {
+  manufacturing_product_raw_material_messages,
+  manufacturing_product_raw_material_validation_messages,
+} = require("@validators/messages/manufacturing_product_raw_material_message");
+
 module.exports = {
   error_messages,
   sort_field_message,
@@ -84,4 +93,8 @@ module.exports = {
   raw_material_stock_entry_bill_messages,
   raw_material_stock_entry_bill_validation_messages,
   raw_material_stock_entry_vehicle_validation_messages,
+  manufacturing_product_messages,
+  manufacturing_product_validation_messages,
+  manufacturing_product_raw_material_messages,
+  manufacturing_product_raw_material_validation_messages,
 };

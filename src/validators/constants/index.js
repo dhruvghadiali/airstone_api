@@ -68,6 +68,14 @@ const {
   raw_material_stock_entry_vehicle_validation_limits,
 } = require("@validators/constants/raw_material_stock_entry_vehicle_constants");
 
+const {
+  manufacturing_product_validation_limits,
+  manufacturing_product_validation_patterns,
+} = require("@validators/constants/manufacturing_product_constants");
+const {
+  manufacturing_product_raw_material_validation_limits,
+} = require("@validators/constants/manufacturing_product_raw_material_constants");
+
 module.exports = {
   app_time,
   financial_year,
@@ -95,4 +103,7 @@ module.exports = {
   raw_material_stock_entry_validation_limits,
   raw_material_stock_entry_bill_validation_limits,
   raw_material_stock_entry_vehicle_validation_limits,
+  manufacturing_product_validation_limits,
+  manufacturing_product_validation_patterns,
+  manufacturing_product_raw_material_validation_limits,
 };
