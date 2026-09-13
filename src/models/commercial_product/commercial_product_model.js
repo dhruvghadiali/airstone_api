@@ -146,7 +146,8 @@ const commercial_product_schema = new mongoose.Schema(
       validate: {
         validator: (value) =>
           Array.isArray(value) &&
-          value.length <= commercial_product_validation_limits.CLIENTS_MAX_ITEMS,
+          value.length <=
+            commercial_product_validation_limits.CLIENTS_MAX_ITEMS,
         message: commercial_product_validation_messages.CLIENTS_MAX,
       },
     },

@@ -12,6 +12,9 @@ const {
   find_active_company_address,
 } = require("@helpers/company/db/find_active_company_address");
 const {
+  is_active_supplier_company_exists,
+} = require("@helpers/company/db/is_active_supplier_company_exists");
+const {
   create_company_with_relations,
 } = require("@helpers/company/db/create_company_with_relations");
 const {
@@ -24,6 +27,7 @@ const {
 module.exports = {
   is_active_company_exists,
   find_active_company_address,
+  is_active_supplier_company_exists,
   create_company_with_relations,
   deactivate_company_with_relations,
   deactivate_company_address_with_relations,

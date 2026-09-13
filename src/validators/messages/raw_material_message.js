@@ -22,8 +22,10 @@ const units_of_measure = Object.values(raw_material_unit_of_measure).join(", ");
  * that changed nothing.
  *
  * `SUPPLIER_INVALID` is what an id in the supplier list is reported as when it
- * does not point at an active company. The controller raises one entry per bad
- * id, so a caller sending three ids learns which one is wrong.
+ * does not point at an active company we buy from. A firm we only sell to
+ * cannot supply us, so the check reads `company_type` as well as `is_active`.
+ * The entry names the position in the list, the way Joi addresses an array
+ * entry, so a caller sending three ids knows which one to fix.
  */
 const raw_material_messages = Object.freeze({
   CREATED: "Raw material created successfully",
@@ -55,7 +57,7 @@ const raw_material_validation_messages = Object.freeze({
   UNIT_INVALID: `Unit must be one of: ${units_of_measure}`,
   SUPPLIER_BASE: "Supplier must be a list of company ids",
   SUPPLIER_ITEM_BASE: "Each supplier must be a string",
-  SUPPLIER_INVALID: "Supplier must reference an active company",
+  SUPPLIER_INVALID: "Supplier must reference an active company we buy from",
   MINIMUM_STOCK_LEVEL_BASE: "Minimum stock level must be a number",
   MINIMUM_STOCK_LEVEL_MIN: `Minimum stock level must be at least ${raw_material_validation_limits.MINIMUM_STOCK_LEVEL_MIN}`,
   MINIMUM_STOCK_LEVEL_MAX: `Minimum stock level must not exceed ${raw_material_validation_limits.MINIMUM_STOCK_LEVEL_MAX}`,

@@ -27,4 +27,19 @@ const contact_position = Object.freeze({
   PURCHASE: "purchase",
 });
 
-module.exports = { company_type, contact_position };
+/**
+ * The company types we may buy from.
+ *
+ * A firm we only sell stone to cannot supply us raw material, so a supplier
+ * list is held to this set rather than to every company on file. `both` is in
+ * it because the same firm often sells to us and buys from us.
+ *
+ * Built from `company_type` rather than typed again, so renaming a value moves
+ * this set with it.
+ */
+const supplier_company_types = Object.freeze([
+  company_type.BOTH,
+  company_type.SUPPLIER,
+]);
+
+module.exports = { company_type, contact_position, supplier_company_types };

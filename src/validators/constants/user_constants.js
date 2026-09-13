@@ -16,7 +16,7 @@ const PASSWORD_SALT_ROUNDS = 12;
  * It is stored the same way as any other password -- hashed by the model before
  * it is saved -- so it is never written to the database in plain text.
  */
-const DEFAULT_USER_PASSWORD = "Aristone@123456";
+const DEFAULT_USER_PASSWORD = "Airstone@123456";
 
 /**
  * emp_id is generated as <2-digit year><2-digit month><3-digit sequence>, e.g.

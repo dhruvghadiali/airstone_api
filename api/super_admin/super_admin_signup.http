@@ -1,0 +1,27 @@
+### Super admin signup
+# POST /super-admin/auth/signup
+#
+# Creates the one super admin account. Open by design: it is the bootstrap
+# endpoint, so it runs before any account exists to authorise it. It shuts
+# itself the moment that account exists, and a second call answers 409.
+#
+# The server sets emp_id and user_type, so the body must not carry them. The
+# schema rejects unknown fields, so sending either is a 400.
+#
+# Base url and path pieces come from the REST Client variables in
+# .vscode/settings.json. Point localBase_url at a running server first.
+#
+# Expect 201 with the new account and no token. Signing up is not signing in,
+# so run the signin request next to get one.
+
+POST {{localBase_url}}{{super_admin_route}}{{signup_route}}
+Content-Type: application/json
+
+{
+  "first_name": "Dhruv",
+  "last_name": "Ghadiali",
+  "email": "superadmin@airstone-sit.com",
+  "phone_number": "7405111564",
+  "username": "superadmin",
+  "password": "Airstone@123456"
+}

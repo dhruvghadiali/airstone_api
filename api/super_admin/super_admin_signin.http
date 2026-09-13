@@ -1,0 +1,29 @@
+### Super admin signin
+# POST /super-admin/auth/signin
+#
+# Signs the super admin in and returns the JWT their later requests carry.
+# Public, because this is one of the endpoints that hands a token out rather
+# than asking for one.
+#
+# The role is fixed by the endpoint. An admin or an employee with correct
+# credentials is still refused here, and a deactivated account cannot sign back
+# in. An unknown username and a wrong password both answer 401, so neither can
+# be used to discover which usernames exist.
+#
+# Only username and password are accepted. The schema rejects unknown fields,
+# so sending user_type or role is a 400.
+#
+# Base url and path pieces come from the REST Client variables in
+# .vscode/settings.json. Run super_admin_signup.http first if no account exists.
+#
+# Expect 200 with the account and a token. Copy that token into the
+# super_admin_token variable in .vscode/settings.json to use it on the
+# protected super admin routes.
+
+POST {{localBase_url}}{{super_admin_route}}{{signin_route}}
+Content-Type: application/json
+
+{
+  "username": "superadmin",
+  "password": "Airstone@123456"
+}

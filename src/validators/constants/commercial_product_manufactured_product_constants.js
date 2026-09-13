@@ -14,10 +14,11 @@
  * `MANUFACTURED_PRODUCT_MIN_ITEMS` and `MANUFACTURED_PRODUCT_MAX_ITEMS` live in
  * `commercial_product_constants`, beside the field that holds the list.
  */
-const commercial_product_manufactured_product_validation_limits =
-  Object.freeze({
+const commercial_product_manufactured_product_validation_limits = Object.freeze(
+  {
     QTY_MIN: 1,
     QTY_MAX: 1000000,
-  });
+  },
+);
 
 module.exports = { commercial_product_manufactured_product_validation_limits };
