@@ -21,6 +21,13 @@ const units_of_measure = Object.values(raw_material_unit_of_measure).join(", ");
  * names no field is a call that would do nothing, and saying so beats a 200
  * that changed nothing.
  *
+ * `NOT_FOUND` answers three different questions on purpose. On update it means
+ * no material has that id. On delete it means no *active* material has it, and
+ * on restore no *deactivated* one, because each filters on the state it is
+ * about to change. So a caller who deletes twice, or restores a material that
+ * is already live, is told the same thing as one who sent an unknown id. They
+ * do not need to tell those apart, and one stable answer is easier to handle.
+ *
  * `SUPPLIER_INVALID` is what an id in the supplier list is reported as when it
  * does not point at an active company we buy from. A firm we only sell to
  * cannot supply us, so the check reads `company_type` as well as `is_active`.
@@ -33,6 +40,7 @@ const raw_material_messages = Object.freeze({
   LISTED: "Raw materials fetched successfully",
   UPDATED: "Raw material updated successfully",
   DELETED: "Raw material deleted successfully",
+  RESTORED: "Raw material restored successfully",
   NOT_FOUND: "Raw material not found",
   CODE_EXISTS: "A raw material with this material code already exists",
   INVALID_ID: "Invalid raw material id",
