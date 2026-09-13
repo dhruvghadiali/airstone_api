@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 /**
  * Builds a validator that accepts a number carrying no more decimal places than
  * allowed.
@@ -14,7 +16,7 @@
 const is_within_decimal_places = (max_decimal_places) => (value) => {
   // An optional field arrives as null when unset. Whether that is acceptable is
   // the field's own `required` rule to decide, not this validator's.
-  if (value === null || value === undefined) {
+  if (_.isNil(value)) {
     return true;
   }
 

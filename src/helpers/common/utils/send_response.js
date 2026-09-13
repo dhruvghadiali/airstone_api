@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 /**
  * Coerces whatever a controller returns into the object `data` always is.
  *
@@ -19,7 +21,7 @@
  * @throws  {TypeError} When `data` is an array or any other non-object value.
  */
 const normalize_response_data = (data) => {
-  if (data === undefined || data === null) return {};
+  if (_.isNil(data)) return {};
 
   if (Array.isArray(data)) {
     throw new TypeError(

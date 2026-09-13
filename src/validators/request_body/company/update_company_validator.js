@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const joi = require("joi");
 
 const { company_validation_messages } = require("@validators/messages");
@@ -12,11 +13,8 @@ const {
  * on create changes here in the same edit. Only requiredness differs between the
  * two, which is what `.optional()` undoes.
  */
-const update_company_fields = Object.fromEntries(
-  Object.entries(base_company_fields).map(([field, schema]) => [
-    field,
-    schema.optional(),
-  ]),
+const update_company_fields = _.mapValues(base_company_fields, (schema) =>
+  schema.optional(),
 );
 
 /**

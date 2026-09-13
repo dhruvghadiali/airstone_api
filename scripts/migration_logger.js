@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const moment = require('moment');
 const { execSync } = require('node:child_process');
 
 /**
@@ -32,8 +33,9 @@ const { execSync } = require('node:child_process');
  * deploy.
  */
 
-// 2026-08-15T06:11:51.482Z -> 2026-08-15T06:11:51Z
-const timestamp = () => new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+// 2026-08-15T06:11:51Z -- UTC, to the second. Formatted rather than sliced out
+// of an ISO string, so the shape is stated once instead of hidden in a regex.
+const timestamp = () => moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
 
 const format_duration = (milliseconds) =>
   milliseconds < 1000

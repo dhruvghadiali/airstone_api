@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 /**
  * `Number.isInteger` for a field that is allowed to be empty.
  *
@@ -10,7 +12,6 @@
  * @param   {*} value  The value a schema is validating.
  * @returns {boolean} True for a whole number, null or undefined.
  */
-const is_optional_integer = (value) =>
-  value === null || value === undefined || Number.isInteger(value);
+const is_optional_integer = (value) => _.isNil(value) || _.isInteger(value);
 
 module.exports = { is_optional_integer };

@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 const {
   date_filter_params,
 } = require("@helpers/list_query/utils/date_filter_params");
@@ -20,7 +22,7 @@ const build_date_range = (query, field) => {
   if (query[from]) range.$gte = query[from];
   if (query[to]) range.$lte = query[to];
 
-  return Object.keys(range).length ? range : null;
+  return _.isEmpty(range) ? null : range;
 };
 
 module.exports = { build_date_range };

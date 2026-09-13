@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 const { auth_response } = require("@helpers/auth/constants");
 const { get_response_shape } = require("@helpers/common");
 const {
@@ -21,9 +23,9 @@ const build_signin_payload = (user) => {
   const { select } = get_response_shape(auth_response, "signin");
 
   return {
-    ...Object.fromEntries(
-      select.split(" ").map((column) => [column, user[column]]),
-    ),
+    // `_.pick` reads the select string the same way a projection does, so the
+    // payload and the query it came from cannot list different columns.
+    ..._.pick(user, select.split(" ")),
     token: generate_auth_token(user),
   };
 };

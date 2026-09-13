@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const moment = require('moment');
 
 /**
  * Shared plumbing for `npm run migrate` and `npm run migrate:rollback`.
@@ -85,10 +86,10 @@ const resolve_migration = (file_path, file_name) => {
   );
 };
 
-// 2026-08-15T05:45:12.345Z -> 2026-08-15T05-45-12Z, safe on every filesystem
-// and still sorting chronologically.
-const build_timestamp = () =>
-  new Date().toISOString().replace(/[:.]/g, '-').replace(/-\d{3}Z$/, 'Z');
+// 2026-08-15T05-45-12Z -- UTC, with no colons or dots, so the name is safe on
+// every filesystem and still sorts chronologically. Formatted rather than
+// sliced out of an ISO string, so the shape is stated once.
+const build_timestamp = () => moment.utc().format('YYYY-MM-DDTHH-mm-ss[Z]');
 
 // executed name -> the name the file had while pending.
 const strip_timestamp = (executed_name) => {
