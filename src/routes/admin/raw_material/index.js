@@ -8,6 +8,7 @@ const {
 
 const create_raw_material_route = require("@routes/admin/raw_material/create_raw_material_route");
 const update_raw_material_route = require("@routes/admin/raw_material/update_raw_material_route");
+const delete_raw_material_route = require("@routes/admin/raw_material/delete_raw_material_route");
 
 const router = express.Router();
 
@@ -21,14 +22,16 @@ const router = express.Router();
  * A super admin deliberately cannot reach this. Keeping the material list is
  * day to day work, and the super admin router is for the things only it can do.
  *
- * Create and update exist. There is no list, no get and no delete yet, by
- * design rather than by oversight: none has been asked for. Each needs a
- * decision this router has not taken -- a list needs the table's filter and
- * sort contract, and a delete needs an answer for the purchases, the stock
- * entries and the recipes that point at the material.
+ * Create, update and delete exist. There is no list and no get yet, by design
+ * rather than by oversight: neither has been asked for. A list needs the
+ * table's filter and sort contract before it can be written.
+ *
+ * The delete deactivates the material and nothing else. It does not touch the
+ * purchases and stock entries that name it, and `delete_raw_material` says why.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
 router.use(create_raw_material_route);
 router.use(update_raw_material_route);
+router.use(delete_raw_material_route);
 
 module.exports = router;
