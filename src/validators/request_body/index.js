@@ -25,6 +25,7 @@ const {
 } = require("@validators/request_body/company");
 const {
   create_raw_material_schema,
+  update_raw_material_schema,
 } = require("@validators/request_body/raw_material");
 
 module.exports = {
@@ -39,4 +40,5 @@ module.exports = {
   update_company_contact_schema,
   update_company_address_schema,
   create_raw_material_schema,
+  update_raw_material_schema,
 };

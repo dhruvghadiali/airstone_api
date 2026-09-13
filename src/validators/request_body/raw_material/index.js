@@ -6,5 +6,6 @@
  * -- a validator reads the field map by path -- never through this file.
  */
 const create_raw_material_schema = require("@validators/request_body/raw_material/create_raw_material_validator");
+const update_raw_material_schema = require("@validators/request_body/raw_material/update_raw_material_validator");
 
-module.exports = { create_raw_material_schema };
+module.exports = { create_raw_material_schema, update_raw_material_schema };

@@ -7,6 +7,7 @@ const {
 } = require("@middlewares/authenticate_user");
 
 const create_raw_material_route = require("@routes/admin/raw_material/create_raw_material_route");
+const update_raw_material_route = require("@routes/admin/raw_material/update_raw_material_route");
 
 const router = express.Router();
 
@@ -20,13 +21,14 @@ const router = express.Router();
  * A super admin deliberately cannot reach this. Keeping the material list is
  * day to day work, and the super admin router is for the things only it can do.
  *
- * Only create exists today. There is no list, no get, no update and no delete
- * yet, by design rather than by oversight: none has been asked for. Each needs
- * a decision this router has not taken -- a list needs the table's filter and
- * sort contract, and a delete needs an answer for the purchases and the recipes
- * that point at the material.
+ * Create and update exist. There is no list, no get and no delete yet, by
+ * design rather than by oversight: none has been asked for. Each needs a
+ * decision this router has not taken -- a list needs the table's filter and
+ * sort contract, and a delete needs an answer for the purchases, the stock
+ * entries and the recipes that point at the material.
  */
 router.use(authenticate_user, authorize_user_types(user_type.ADMIN));
 router.use(create_raw_material_route);
+router.use(update_raw_material_route);
 
 module.exports = router;
