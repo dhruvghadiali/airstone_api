@@ -17,9 +17,14 @@ const {
   list_company_contacts_query_schema,
 } = require("@validators/query_params/company_contact");
 
+const {
+  list_raw_materials_query_schema,
+} = require("@validators/query_params/raw_material");
+
 module.exports = {
   list_users_query_schema,
   list_employees_query_schema,
   list_companies_query_schema,
   list_company_contacts_query_schema,
+  list_raw_materials_query_schema,
 };
