@@ -28,6 +28,10 @@ const {
   update_raw_material_schema,
 } = require("@validators/request_body/raw_material");
 
+const {
+  create_raw_material_purchase_schema,
+} = require("@validators/request_body/raw_material_purchase");
+
 module.exports = {
   admin_signin_schema,
   admin_signup_schema,
@@ -41,4 +45,5 @@ module.exports = {
   update_company_address_schema,
   create_raw_material_schema,
   update_raw_material_schema,
+  create_raw_material_purchase_schema,
 };

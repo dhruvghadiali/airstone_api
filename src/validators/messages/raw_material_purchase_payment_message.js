@@ -12,10 +12,15 @@ const {
 const payment_types = Object.values(payment_type).join(", ");
 
 /**
- * `PAYMENT_REFERENCE_REQUIRED` is not a schema rule. A cash payment has no
- * reference and stores null, so requiredness depends on `payment_type`. That is
- * a rule about one field given another, so the purchase helper enforces it and
- * this is what it reports.
+ * `PAYMENT_REFERENCE_REQUIRED` is a rule about one field given another: a cash
+ * payment has no reference, every other type must carry one. The Mongoose
+ * schema cannot state it, so the Joi create schema does, with `.when`. The
+ * error then names the entry -- `payment.0.payment_reference` -- rather than
+ * the list.
+ *
+ * `PAYMENT_ENTRY_BASE` is for an entry in that list that is not an object at
+ * all. `PAYMENT_BASE` on the purchase's own messages is the other half of the
+ * pair, for a `payment` that is not a list.
  *
  * `NOT_FOUND` and `INVALID_ID` address one payment inside a purchase. Each entry
  * carries its own `_id`, so an endpoint can update or remove a single payment
@@ -30,6 +35,7 @@ const raw_material_purchase_payment_messages = Object.freeze({
 });
 
 const raw_material_purchase_payment_validation_messages = Object.freeze({
+  PAYMENT_ENTRY_BASE: "Each payment must be an object",
   PAYMENT_TYPE_REQUIRED: "Payment type is required",
   PAYMENT_TYPE_BASE: "Payment type must be a string",
   PAYMENT_TYPE_EMPTY: "Payment type cannot be empty",

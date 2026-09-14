@@ -33,11 +33,15 @@ const {
  * the same reason it does on the raw material: the firm selling us sand is often
  * a firm we sell stone to.
  *
- * `purchase_date` and `expected_delivery_date` are days, not moments. The
- * controller stores each at IST midnight using `app_time`, so a purchase made
- * late in the evening does not read as the next day. That the delivery date is
- * not before the purchase date is a rule about two fields, so the helper checks
- * it.
+ * `purchase_date` and `expected_delivery_date` are days, not moments. Each is
+ * parsed as ISO by the create schema and stored exactly as parsed, so a plain
+ * `2026-09-14` is midnight UTC. Nothing shifts them to another zone: both are
+ * days a person picked, not the moment a row was written, and moving them would
+ * only make the stored date disagree with the one on screen.
+ *
+ * That the delivery date is not before the purchase date is a rule about two
+ * fields in one body, so the create schema states it with a Joi `ref` rather
+ * than leaving it to a helper.
  *
  * `qty` is not held to whole numbers. Half a tonne of sand is a real purchase.
  *
