@@ -53,6 +53,7 @@ const raw_material_purchase_validation_messages = Object.freeze({
   PURCHASE_DATE_REQUIRED: "Purchase date is required",
   PURCHASE_DATE_BASE: "Purchase date must be a date",
   PURCHASE_DATE_INVALID: "Purchase date must be a valid date",
+  PURCHASE_DATE_FUTURE: "Purchase date cannot be in the future",
   EXPECTED_DELIVERY_DATE_REQUIRED: "Expected delivery date is required",
   EXPECTED_DELIVERY_DATE_BASE: "Expected delivery date must be a date",
   EXPECTED_DELIVERY_DATE_INVALID: "Expected delivery date must be a valid date",

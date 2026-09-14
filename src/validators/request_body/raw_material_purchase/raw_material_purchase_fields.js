@@ -1,4 +1,5 @@
 const joi = require("joi");
+const moment = require("moment");
 
 const { is_within_decimal_places } = require("@helpers/common");
 const { gst_slab, raw_material_unit_of_measure } = require("@enums");
@@ -6,6 +7,7 @@ const {
   raw_material_purchase_validation_messages,
 } = require("@validators/messages");
 const {
+  app_time,
   validation_limits,
   raw_material_purchase_validation_limits,
 } = require("@validators/constants");
@@ -64,6 +66,20 @@ const money_amount = (messages) =>
  * midnight UTC, which is what a date with no time means; the endpoint stores
  * exactly what was parsed and shifts nothing.
  *
+ * `purchase_date` may not be after today. An order cannot have been placed
+ * tomorrow, so a year typed as 2062 is caught at the boundary rather than
+ * stored. Today is the IST day, not the UTC one: late in a UTC evening it is
+ * already tomorrow in India, and a buyer picking their own today would
+ * otherwise be refused. That is why the bound is the end of the IST day rather
+ * than Joi's `'now'`, which is a bare instant.
+ *
+ * The bound is computed on each request rather than when this file loads. A
+ * schema built at boot would keep yesterday's ceiling after midnight.
+ *
+ * `expected_delivery_date` carries no future rule, deliberately. It only has to
+ * be on or after `purchase_date`, so a purchase can still be back-entered after
+ * the material has arrived.
+ *
  * `gst_percentage` is a String because the rate is a label on a bill rather than
  * a number to do arithmetic on. The tax it implies is checked against
  * `gst_amount` by the controller, not here -- that is arithmetic across five
@@ -108,13 +124,26 @@ const base_raw_material_purchase_fields = {
       "string.length":
         raw_material_purchase_validation_messages.SUPPLIER_INVALID,
     }),
-  purchase_date: joi.date().iso().required().messages({
-    "any.required":
-      raw_material_purchase_validation_messages.PURCHASE_DATE_REQUIRED,
-    "date.base": raw_material_purchase_validation_messages.PURCHASE_DATE_BASE,
-    "date.format":
-      raw_material_purchase_validation_messages.PURCHASE_DATE_INVALID,
-  }),
+  purchase_date: joi
+    .date()
+    .iso()
+    .custom((value, helpers) =>
+      moment(value).isAfter(
+        moment().utcOffset(app_time.UTC_OFFSET).endOf("day"),
+      )
+        ? helpers.error("date.max")
+        : value,
+    )
+    .required()
+    .messages({
+      "any.required":
+        raw_material_purchase_validation_messages.PURCHASE_DATE_REQUIRED,
+      "date.base": raw_material_purchase_validation_messages.PURCHASE_DATE_BASE,
+      "date.format":
+        raw_material_purchase_validation_messages.PURCHASE_DATE_INVALID,
+      "date.max":
+        raw_material_purchase_validation_messages.PURCHASE_DATE_FUTURE,
+    }),
   expected_delivery_date: joi
     .date()
     .iso()
