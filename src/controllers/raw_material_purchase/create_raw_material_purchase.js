@@ -52,8 +52,13 @@ const {
  * The reply expands the material and the supplier, so a client can render what
  * it just created without two more calls.
  *
- * @route   POST /admin/raw-material-purchases
- * @access  Admin
+ * Only an employee may call this, enforced on the router rather than here. An
+ * admin cannot, which is the one place in this API where the admin is not a
+ * superset of the employee: the admin router keeps the material master, and
+ * recording what was actually bought belongs to the people handling it.
+ *
+ * @route   POST /employee/raw-material-purchases
+ * @access  Employee
  *
  * @param   {import("express").Request} req
  * @param   {Object} req.body Validated by `create_raw_material_purchase_schema`,
@@ -105,7 +110,8 @@ const {
  *                      material's, or when a money figure does not tie out. The
  *                      `errors` list names every field at fault.
  * @throws  {app_error} 401 when the caller sent no usable token.
- * @throws  {app_error} 403 `ACCESS_FORBIDDEN` when the caller is not an admin.
+ * @throws  {app_error} 403 `ACCESS_FORBIDDEN` when the caller is not an
+ *                      employee.
  */
 const create_raw_material_purchase = async (req, res) => {
   // Two independent reads, so they run together rather than one after the other.
